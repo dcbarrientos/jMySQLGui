@@ -1,5 +1,5 @@
-MySQL IDE
-Version 0.8.0 
+jMySQLGui
+Version 0.1 
 =========
 
 
@@ -7,7 +7,7 @@ Version 0.8.0
 ------------------------------------
 DESCRIPTION:
 ------------------------------------
-MySQL IDE is a graphic tool that allows to configure and administer MySQL 
+jMySQLGui is a graphic tool that allows to configure and administer MySQL 
 Server.
 This program was designed to give MySQL users an easy way to work 
 with this server. 
@@ -19,7 +19,7 @@ read the file `LICENSE.txt` included in this distribution.
 --------------------------------------
 COPYRIGHT
 --------------------------------------
-MySQL IDE Copyright 2005 Diego C. Barrientos, dc_barrientos@yahoo.com.ar
+jMySQLGui Copyright 2005 Diego C. Barrientos, dc_barrientos@yahoo.com.ar
 
 This program is free software; you can redistribute it and/or modify it 
 under the terms of the GNU General Public License as published by the Free 
@@ -64,9 +64,6 @@ REQUIREMENTS:
 ------------------------------------
 INSTALLATION
 ------------------------------------
-MySQL IDE doesn't need to be installed, just unzip the files into a directory
-and execute run.bat. Remember to install MySQL Connector/J before you execute
-MySQL IDE, otherwise, it will not work.
 
 
 
@@ -81,4 +78,3 @@ dc_barrientos@yahoo.com.ar
 ------------------------------------
 PROJECT HOMEPAGE
 ------------------------------------
-http://sourceforge....
