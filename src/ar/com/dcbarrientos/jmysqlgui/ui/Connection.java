@@ -128,7 +128,7 @@ public class Connection extends JDialog{
         txtPort.setText("3306");
 
         lblPass.setText(resource.getString("Connection.pass"));
-        txtPass.setText("arrelins");
+        txtPass.setText("");
 
         lblDatabase.setText(resource.getString("Connection.database"));
         txtDatabase.setText("");
