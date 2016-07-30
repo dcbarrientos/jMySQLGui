@@ -47,6 +47,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
+import javax.swing.JPanel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -182,6 +183,7 @@ public class Principal extends JFrame {
 		updateEstadoConexion();
 		
 		desktop = new JDesktopPane();
+		//desktop.setLayout(new BorderLayout());
 		setContentPane(desktop);
 			
 	}
@@ -588,8 +590,8 @@ public class Principal extends JFrame {
 		createDatabaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CreateDatabase.gif"));
 		createTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CreateTable.gif"));
 		dataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Table2.gif"));
-		databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
-		database2Icon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/database2.gif"));
+		//databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
+		//database2Icon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/database2.gif"));
 		databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
 		dropDatabaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropDatabase.gif"));
 		dropTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropTable.gif"));
@@ -604,7 +606,7 @@ public class Principal extends JFrame {
 		privilegesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Privileges.gif"));
 		refreshIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Refresh.gif"));
 		runIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Run.gif"));
-		tableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/table.gif"));
+		//tableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/table.gif"));
 		tableDiagnosticIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/TableDiagnostic.gif"));
 		userManagerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/UserManager.gif"));
 		viewDataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ViewData.gif"));
@@ -654,7 +656,7 @@ public class Principal extends JFrame {
 	}
 	
 	public void conectar(){
-		MdiAdmin admin = new MdiAdmin(resource);
+		MdiAdmin admin = new MdiAdmin(resource, cconnection);
 		admin.setConnection(cconnection);
 		desktop.add(admin, BorderLayout.CENTER);
 		isConnected = true;
