@@ -84,7 +84,7 @@ public class CQuery {
 		return rowCount;
 	}
 	
-	private void cerrar(){
+	public void cerrar(){
 		try {
 			if(result != null)
 				result.close();
@@ -165,5 +165,9 @@ public class CQuery {
 	
 	public String getErrMsg(){
 		return errMsg;
+	}
+	
+	public ResultSet getResultSet(){
+		return result;
 	}
 }

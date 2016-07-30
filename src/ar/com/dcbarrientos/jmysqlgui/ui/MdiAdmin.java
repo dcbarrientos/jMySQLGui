@@ -26,13 +26,20 @@
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
+import java.awt.BorderLayout;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
-import javax.swing.JSplitPane;
-import java.awt.BorderLayout;
+import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
+import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -40,25 +47,98 @@ import java.awt.BorderLayout;
  */
 public class MdiAdmin extends JPanel{
 	private static final long serialVersionUID = 1L;
-	private CConnection conection;
+	private CConnection connection;
 	private ResourceBundle resource;
+	Vector<CDatabase> databases;
+	String userName;
 	
-	public MdiAdmin(ResourceBundle resource){
+	public MdiAdmin(ResourceBundle resource, CConnection connection){
 		this.resource = resource;
+		this.connection = connection;
 		setLayout(new BorderLayout(0, 0));
-		
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		add(splitPane, BorderLayout.CENTER);
 		
 		initComponents();
 	}
 	
 	private void initComponents(){
+		cargarInformacion();
+
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		add(splitPane, BorderLayout.CENTER);
 		
+		JSplitPane panelSuperior = new JSplitPane();
+		splitPane.setLeftComponent(panelSuperior);
+		
+		JScrollPane scrollTreeDatabase = new JScrollPane();
+		panelSuperior.setLeftComponent(scrollTreeDatabase);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		panelSuperior.setRightComponent(tabbedPane);
+		
+		JPanel panelInferior = new JPanel();
+		splitPane.setRightComponent(panelInferior);
+setLocation(0, 0);		
+setSize(600,600);
+		DatabaseTree dbTree = new DatabaseTree(this, userName, databases);
+		//dbTree.setUser(userName);
+		//dbTree.setDatabases(databases);
+		
+		scrollTreeDatabase.setViewportView(dbTree);
+	}
+	
+	private void cargarInformacion(){
+		userName = getUser();
+		databases = new Vector<CDatabase>();
+		CQuery query = new CQuery(connection.getConnection());
+		String sql = "SHOW DATABASES";
+		CDatabase cDatabase;
+		if(query.executeQuery(sql)> 0){
+			try{
+				ResultSet result = query.getResultSet();
+				while(result.next()){					
+					cDatabase = new CDatabase(result.getString("Database"), connection.getConnection());
+					databases.addElement(cDatabase);
+				}
+			}catch(SQLException e){
+				//TODO tratamiento error.
+			}
+		}
+		query.cerrar();
+		
+		//mostrar();
+	}
+	
+	private void mostrar(){
+		for(CDatabase db : databases){
+			System.out.println(db.getName());
+			db.mostrar();
+		}
 	}
 	
 	public void setConnection(CConnection connection){
-		this.conection = connection;
+		this.connection = connection;
+	}
+	
+	private String getUser(){
+		userName = "";
+		String sql = "SELECT USER()";
+		CQuery query = new CQuery(connection.getConnection());
+		if(query.executeQuery(sql)>0){
+			try {
+				query.getResultSet().next();
+				userName = query.getResultSet().getString(1);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		query.cerrar();
+		
+		return userName;
+	}
+	
+	public ResourceBundle getResource(){
+		return resource;
 	}
 }
