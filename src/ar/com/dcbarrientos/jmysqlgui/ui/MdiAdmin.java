@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -74,15 +75,19 @@ public class MdiAdmin extends JPanel{
 		panelSuperior.setLeftComponent(scrollTreeDatabase);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		//Tab Host
+		ImageIcon databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
+		tabbedPane.addTab(resource.getString("Host.title"), databaseServerIcon, new Host(connection, resource));
+		//Tab Query Editor
+		ImageIcon queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
+		tabbedPane.addTab(resource.getString("QueryEditor.title"), queryIcon, new QueryEditor(connection, resource));
 		panelSuperior.setRightComponent(tabbedPane);
+		
 		
 		JPanel panelInferior = new JPanel();
 		splitPane.setRightComponent(panelInferior);
-setLocation(0, 0);		
-setSize(600,600);
-		DatabaseTree dbTree = new DatabaseTree(this, userName, databases);
-		//dbTree.setUser(userName);
-		//dbTree.setDatabases(databases);
+
+		DatabaseTree dbTree = new DatabaseTree(userName, databases, resource);
 		
 		scrollTreeDatabase.setViewportView(dbTree);
 	}
@@ -109,33 +114,20 @@ setSize(600,600);
 		//mostrar();
 	}
 	
+	/*
 	private void mostrar(){
 		for(CDatabase db : databases){
 			System.out.println(db.getName());
 			db.mostrar();
 		}
-	}
+	}*/
 	
 	public void setConnection(CConnection connection){
 		this.connection = connection;
 	}
 	
 	private String getUser(){
-		userName = "";
-		String sql = "SELECT USER()";
-		CQuery query = new CQuery(connection.getConnection());
-		if(query.executeQuery(sql)>0){
-			try {
-				query.getResultSet().next();
-				userName = query.getResultSet().getString(1);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		query.cerrar();
-		
-		return userName;
+		return connection.getUserName() + "@" + connection.getHost();
 	}
 	
 	public ResourceBundle getResource(){

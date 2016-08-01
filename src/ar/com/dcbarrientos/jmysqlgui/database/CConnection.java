@@ -34,6 +34,10 @@ import java.sql.SQLException;
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
+/**
+ * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
+ *
+ */
 public class CConnection {
 	private String host;
 	private String user;
@@ -49,6 +53,7 @@ public class CConnection {
 	public static final String DRIVER = "com.mysql.jdbc.Driver";	
 
 	private Connection connection;
+	private CQuery query;
 	
 	//Interffaz de errores.
 	private int errCode;
@@ -134,6 +139,34 @@ public class CConnection {
 		return isConnected;
 	}
 	
+	public String getUserName(){
+		return user;
+	}
 	
+	public String getHost(){
+		return host;
+	}
+
+	
+	/**
+	 * @return Devuelve la version de MySQL Server.
+	 */
+	public String getVersion(){
+		String sql = "SELECT version()";
+		String version = "";
+		query = new CQuery(connection);
+		
+		if(query.executeQuery(sql)>0){
+			try {
+				query.getResultSet().next();
+				version = query.getResultSet().getString(1);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return version;
+	}
 	
 }

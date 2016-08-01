@@ -27,17 +27,18 @@
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
@@ -47,7 +48,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
-import javax.swing.JPanel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -58,7 +58,8 @@ public class Principal extends JFrame {
 	private CConnection cconnection;
 	private boolean isConnected;
 	
-	JDesktopPane desktop;
+	//JDesktopPane desktop;
+	JPanel desktop;
 	private JMenuBar menuPrincipal;
 	private JMenu jMenuFile;
 	private JMenuItem jMenuFileConnection;
@@ -182,9 +183,16 @@ public class Principal extends JFrame {
 		setJMenuBar(getMenuPrincipal());
 		updateEstadoConexion();
 		
-		desktop = new JDesktopPane();
+		desktop = new JPanel();
+		desktop.setBackground(Color.RED);
+		desktop.setLayout(new BorderLayout());
+		
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(desktop, BorderLayout.CENTER);
+		
+		//desktop = new JDesktopPane();
 		//desktop.setLayout(new BorderLayout());
-		setContentPane(desktop);
+		//setContentPane(desktop);
 			
 	}
 	
@@ -592,14 +600,14 @@ public class Principal extends JFrame {
 		dataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Table2.gif"));
 		//databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
 		//database2Icon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/database2.gif"));
-		databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
+		//databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
 		dropDatabaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropDatabase.gif"));
 		dropTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropTable.gif"));
 		exportTablesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ExportTables.gif"));
 		funcionesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Funciones.gif"));
 		helpIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Help.gif"));
 		printIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Print.gif"));
-		queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
+		//queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
 		importTextIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ImportText.gif"));
 		insertRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/InsertRecord.gif"));
 		openIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Open.gif"));
@@ -659,8 +667,15 @@ public class Principal extends JFrame {
 		MdiAdmin admin = new MdiAdmin(resource, cconnection);
 		admin.setConnection(cconnection);
 		desktop.add(admin, BorderLayout.CENTER);
+		//add(admin, BorderLayout.CENTER);
 		isConnected = true;
 		updateMenuBar();
+		refresh();
+	}
+	
+	private void refresh(){
+		revalidate();
+		repaint();
 	}
 	
 	private void updateMenuBar(){

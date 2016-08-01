@@ -50,9 +50,12 @@ public class CQuery {
 	private int rowCount;					//cantidad de registros devueltos por la consulta.
 	private int columnCount;			//Cantidad de columnas que tiene la consulta.
 	private Object[][] datos;			//Datos devueltos por la consulta.
+	private boolean customHeaders;		//Verdadero si se uso setHeaders.
+	private String[] headers;			//Nombres de las columnas.
 	
 	public CQuery(Connection connection){
 		this.connection = connection;
+		customHeaders = false;
 	}
 	
 	/**
@@ -75,7 +78,7 @@ public class CQuery {
 			
 			//Obtengo la cantidad de columnas que tiene la consulta.
 			meta = result.getMetaData();
-			meta.getColumnCount();
+			columnCount = meta.getColumnCount();
 		} catch (SQLException e) {
 			error(e.getErrorCode(), e.getMessage());
 			cerrar();
@@ -111,16 +114,22 @@ public class CQuery {
 		return datos;		
 	}
 	
+	public void setHeaders(String[] headers){
+		this.headers = headers;
+		customHeaders = true;
+	}
+	
 	private String[] getHeaders(){
-		String[] headers = new String[columnCount];
-		try{
-			for(int c = 0; c < columnCount; c++)
-				headers[c] = meta.getColumnName(c+1);
-		} catch (SQLException e) {
-			error(e.getErrorCode(), e.getMessage());
-			return null;
+		if(!customHeaders){
+			headers = new String[columnCount];
+			try{
+				for(int c = 0; c < columnCount; c++)
+					headers[c] = meta.getColumnName(c+1);
+			} catch (SQLException e) {
+				error(e.getErrorCode(), e.getMessage());
+				return null;
+			}
 		}
-		
 		return headers;
 	}
 	

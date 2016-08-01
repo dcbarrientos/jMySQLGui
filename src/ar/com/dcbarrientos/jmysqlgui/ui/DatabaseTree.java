@@ -28,7 +28,6 @@ package ar.com.dcbarrientos.jmysqlgui.ui;
 
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -52,7 +51,7 @@ public class DatabaseTree extends JTree{
 	private Vector<CDatabase> databases;			//Estructura de base de datos.
 	private String user;							//Usuario conectado a la base de datos
 	//private Connection connection;						//Conexion abierta.
-	private MdiAdmin admin;
+	//private MdiAdmin admin;
 	private ResourceBundle resource;
 	
 	private DefaultTreeModel treeModel;
@@ -68,12 +67,12 @@ public class DatabaseTree extends JTree{
 		initComponents();
 	}
 	
-	public DatabaseTree(MdiAdmin admin, String user, Vector<CDatabase> databases){
+	public DatabaseTree(String user, Vector<CDatabase> databases, ResourceBundle resource){
 		super();
-		this.admin = admin;
+		//this.admin = admin;
 		this.user = user;
 		this.databases = databases;
-		this.resource = admin.getResource();
+		this.resource = resource;
 		
 		initComponents();
 	}
