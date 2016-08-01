@@ -47,11 +47,20 @@ import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
  *
  */
 public class MdiAdmin extends JPanel{
+	private final static int DATABASE_TAB_INDEX = 1;
+	private final static int TABLE_TAB_INDEX = 2;
+	private final static int DATOS_TAB_INDEX = 3;
+	
 	private static final long serialVersionUID = 1L;
 	private CConnection connection;
 	private ResourceBundle resource;
-	Vector<CDatabase> databases;
-	String userName;
+	private Vector<CDatabase> databases;
+	private String userName;
+	private String selectedDatabaseName;
+	private String selectedTableName;
+	private DatabaseTab dbTab;
+	JTabbedPane tabbedPane;
+	ImageIcon databaseIcon;
 	
 	public MdiAdmin(ResourceBundle resource, CConnection connection){
 		this.resource = resource;
@@ -63,7 +72,9 @@ public class MdiAdmin extends JPanel{
 	
 	private void initComponents(){
 		cargarInformacion();
-
+		
+		databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
+		
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		add(splitPane, BorderLayout.CENTER);
@@ -74,21 +85,22 @@ public class MdiAdmin extends JPanel{
 		JScrollPane scrollTreeDatabase = new JScrollPane();
 		panelSuperior.setLeftComponent(scrollTreeDatabase);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		//Tab Host
 		ImageIcon databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
-		tabbedPane.addTab(resource.getString("Host.title"), databaseServerIcon, new Host(connection, resource));
+		tabbedPane.addTab(resource.getString("Host.title"), databaseServerIcon, new HostTab(connection, resource));
+		
 		//Tab Query Editor
 		ImageIcon queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
-		tabbedPane.addTab(resource.getString("QueryEditor.title"), queryIcon, new QueryEditor(connection, resource));
+		tabbedPane.addTab(resource.getString("QueryEditor.title"), queryIcon, new QueryEditorTab(connection, resource));
 		panelSuperior.setRightComponent(tabbedPane);
 		
 		
 		JPanel panelInferior = new JPanel();
 		splitPane.setRightComponent(panelInferior);
 
-		DatabaseTree dbTree = new DatabaseTree(userName, databases, resource);
-		
+		DatabaseTree dbTree = new DatabaseTree(this, userName, databases, resource);
+		dbTab = new DatabaseTab(this, connection.getConnection());
 		scrollTreeDatabase.setViewportView(dbTree);
 	}
 	
@@ -133,4 +145,61 @@ public class MdiAdmin extends JPanel{
 	public ResourceBundle getResource(){
 		return resource;
 	}
+	
+	/**
+	 * Prepara la solapa en donde se muestran las talas de la base de datos seleccionada.
+	 * @param databaseName Nombre de la base de datos seleccionada
+	 * @param visible True si muestra la solapa.
+	 */
+	public void setSelectedDatabase(String databaseName, boolean visible){
+		this.selectedDatabaseName = databaseName; 
+		connection.setSelectedDatabase(databaseName);
+		
+		dbTab.setDatabase(getDatabase(databaseName));
+
+		if(tabbedPane.getTabCount()<3)
+			tabbedPane.insertTab(resource.getString("DatabaseTab.title") + databaseName, databaseIcon, dbTab, null, DATABASE_TAB_INDEX);
+		
+		tabbedPane.setTitleAt(DATABASE_TAB_INDEX, resource.getString("DatabaseTab.title") + databaseName);
+		if(visible)
+			tabbedPane.setSelectedIndex(DATABASE_TAB_INDEX);
+		refresh();
+	}
+	
+	
+	private void refresh(){
+		revalidate();
+		repaint();
+	}
+	
+	/**
+	 * Devuelve una base de datos.
+	 * @param nombre de la base de datos a buscar en el vector de bases de datos.
+	 * @return devuelve la base de datos con el nombre ingresado.
+	 */
+	private CDatabase getDatabase(String nombre){
+		for(CDatabase elemento: databases){
+			if(elemento.getName().equals(nombre)){
+				return elemento;
+			}
+		}
+		
+		return null;
+	}
+	
+	private String getSelectedDatabase(){
+		return this.selectedDatabaseName;
+	}
+	
+	public void setSelectedTable(String databaseName, String tableName){
+		this.selectedDatabaseName = databaseName;
+		this.selectedTableName = tableName;
+		System.out.println("Tabla seleccionada: " + databaseName + "." + tableName);
+	}
+	
+	public String getSelectedTable(){
+		return this.selectedTableName;
+	}
+	
+	
 }

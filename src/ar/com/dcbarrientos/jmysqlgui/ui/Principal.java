@@ -109,23 +109,23 @@ public class Principal extends JFrame {
 	public ImageIcon createDatabaseIcon;
 	public ImageIcon createTableIcon;
 	public ImageIcon dataIcon;
-	public ImageIcon databaseIcon;
-	public ImageIcon database2Icon;
-	public ImageIcon databaseServerIcon;
+	//public ImageIcon databaseIcon;
+	//public ImageIcon database2Icon;
+	//public ImageIcon databaseServerIcon;
 	public ImageIcon dropDatabaseIcon;
 	public ImageIcon dropTableIcon;
 	public ImageIcon exportTablesIcon;
 	public ImageIcon funcionesIcon;
 	public ImageIcon helpIcon;
 	public ImageIcon printIcon;
-	public ImageIcon queryIcon;
+	//public ImageIcon queryIcon;
 	public ImageIcon importTextIcon;
 	public ImageIcon insertRecordIcon;
 	public ImageIcon openIcon;
 	public ImageIcon privilegesIcon;
 	public ImageIcon refreshIcon;
 	public ImageIcon runIcon;
-	public ImageIcon tableIcon;
+	//public ImageIcon tableIcon;
 	public ImageIcon tableDiagnosticIcon;
 	public ImageIcon userManagerIcon;
 	public ImageIcon viewDataIcon;
@@ -184,16 +184,12 @@ public class Principal extends JFrame {
 		updateEstadoConexion();
 		
 		desktop = new JPanel();
-		desktop.setBackground(Color.RED);
+		desktop.setBackground(new Color(112, 146, 190));
 		desktop.setLayout(new BorderLayout());
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(desktop, BorderLayout.CENTER);
 		
-		//desktop = new JDesktopPane();
-		//desktop.setLayout(new BorderLayout());
-		//setContentPane(desktop);
-			
 	}
 	
 	private JMenuBar getMenuPrincipal(){
@@ -602,14 +598,14 @@ public class Principal extends JFrame {
 		//database2Icon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/database2.gif"));
 		//databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
 		dropDatabaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropDatabase.gif"));
-		dropTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropTable.gif"));
+		//dropTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DropTable.gif"));
 		exportTablesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ExportTables.gif"));
 		funcionesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Funciones.gif"));
 		helpIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Help.gif"));
 		printIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Print.gif"));
 		//queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
 		importTextIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ImportText.gif"));
-		insertRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/InsertRecord.gif"));
+		//insertRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/InsertRecord.gif"));
 		openIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Open.gif"));
 		privilegesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Privileges.gif"));
 		refreshIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Refresh.gif"));
@@ -617,14 +613,14 @@ public class Principal extends JFrame {
 		//tableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/table.gif"));
 		tableDiagnosticIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/TableDiagnostic.gif"));
 		userManagerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/UserManager.gif"));
-		viewDataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ViewData.gif"));
+		//viewDataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/ViewData.gif"));
 		copyCSVIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CopyCSV.gif"));
 		copyHTMLIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CopyHTML.gif"));
 		saveCSVIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/SaveCSV.gif"));
 		saveHTMLIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/SaveHTML.gif"));
-		copyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Copytable.gif"));
-		emptyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Emptytable.gif"));
-		tablePropertiesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/TableProperties.gif"));
+		//copyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Copytable.gif"));
+		//emptyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Emptytable.gif"));
+		//tablePropertiesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/TableProperties.gif"));
 		primerRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Primero.gif"));
 		anteriorRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Anterior.gif"));
 		siguienteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Siguiente.gif"));

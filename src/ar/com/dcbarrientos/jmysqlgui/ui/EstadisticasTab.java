@@ -16,12 +16,12 @@
  */
 
 /** 
- * ProcessList.java
+ * Estadisticas.java
  *
  * Description:	    <Descripcion>
  * @author			Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
- * Created on 31 de jul. de 2016, 8:26:56 p. m. 
+ * Created on 1 de ago. de 2016, 11:55:32 a. m. 
  */
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
@@ -32,59 +32,67 @@ import java.util.ResourceBundle;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class ProcessList extends JPanel{
+public class EstadisticasTab extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private CConnection cconnection;
 	private ResourceBundle resource;
-	private int cantidadProcesos; 		//Cantidad de variables.
+	private int cantidadEstadisticas; 		//Cantidad de variables.
 	
 	JScrollPane scroll;
-	JTable tableProcesos;
+	JTable tableStatus;
 	
-	public ProcessList(CConnection cconnection, ResourceBundle resource){
+	public EstadisticasTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
 		this.resource = resource;
-		cantidadProcesos = 0;
+		cantidadEstadisticas = 0;
 		
 		initComponents();
 	}
 	
 	private void initComponents(){
 		
-		tableProcesos= new JTable();
-		String sql = "SHOW PROCESSLIST;";
+		tableStatus= new JTable();
+		String sql = "SHOW /*!50002 GLOBAL */ STATUS LIKE 'Com\\_%';";
 		
-		String[] headers = {resource.getString("ProcessList.cabezaTabla1"), resource.getString("ProcessList.cabezaTabla2"), 
-				resource.getString("ProcessList.cabezaTabla3"), resource.getString("ProcessList.cabezaTabla4"), 
-				resource.getString("ProcessList.cabezaTabla5"), resource.getString("ProcessList.cabezaTabla6"), 
-				resource.getString("ProcessList.cabezaTabla7"), resource.getString("ProcessList.cabezaTabla8")};
+		String[] headers = {resource.getString("Estadisticas.header1"), resource.getString("Estadisticas.header2")};
 		
 		CQuery query = new CQuery(cconnection.getConnection());
-		query.setHeaders(headers);
-		cantidadProcesos = query.executeQuery(sql); 
-		if(cantidadProcesos > 0){
-			tableProcesos.setModel(query.getModel());			
+		//query.setHeaders(headers);
+		cantidadEstadisticas = query.executeQuery(sql); 
+		if(cantidadEstadisticas > 0){
+			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
+			TableModel tm = cTableModel.getTableModel();
+			
+			TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tm);
+			tableStatus.setModel(tm);
+			
+			tableStatus.setRowSorter(sorter);
+			tableStatus.getRowSorter().toggleSortOrder(1);
+			tableStatus.getRowSorter().toggleSortOrder(1);
+			tableStatus.repaint();
 		}
 		query.cerrar();
 		
 		scroll = new JScrollPane();
-		scroll.setViewportView(tableProcesos);
+		scroll.setViewportView(tableStatus);
 		
 		setLayout(new BorderLayout());
 		add(scroll);
 	}
 	
-	public int getCantidadProcesos(){
-		return cantidadProcesos;
+	public int getCantidadEstadisticas(){
+		return cantidadEstadisticas ;
 	}
-
 }

@@ -98,7 +98,7 @@ public class CDatabase {
 	public int getTableCount(){
 		return tableCount;
 	}
-	
+		
 	public void mostrar(){
 		for(Map.Entry<String, CTabla> elemento: tablas.entrySet()){
 			System.out.println("\t" + elemento.getKey());

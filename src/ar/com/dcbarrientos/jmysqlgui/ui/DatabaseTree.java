@@ -26,7 +26,8 @@
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
-import java.sql.Connection;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
@@ -38,6 +39,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CTabla;
@@ -51,8 +53,9 @@ public class DatabaseTree extends JTree{
 	private Vector<CDatabase> databases;			//Estructura de base de datos.
 	private String user;							//Usuario conectado a la base de datos
 	//private Connection connection;						//Conexion abierta.
-	//private MdiAdmin admin;
+	private MdiAdmin admin;
 	private ResourceBundle resource;
+	private TreePath treePath;
 	
 	private DefaultTreeModel treeModel;
 	private DefaultMutableTreeNode id;
@@ -60,16 +63,28 @@ public class DatabaseTree extends JTree{
 	private DefaultMutableTreeNode users;
 	private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
 	
+	public static final int USER_INDEX = 1;
+	public static final int DATABASE_INDEX = 2;
+	public static final int TABLE_INDEX = 3;
+	
+	
+	/*
 	public DatabaseTree(Connection connection, String user){
 		super();
 		//this.connection = connection;
 		this.user = user;
 		initComponents();
 	}
-	
-	public DatabaseTree(String user, Vector<CDatabase> databases, ResourceBundle resource){
+	*/
+	public DatabaseTree(MdiAdmin admin, String user, Vector<CDatabase> databases, ResourceBundle resource){
 		super();
-		//this.admin = admin;
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				databaseTreeMouseClicked(e);
+			}
+		});
+		this.admin = admin;
 		this.user = user;
 		this.databases = databases;
 		this.resource = resource;
@@ -124,4 +139,42 @@ public class DatabaseTree extends JTree{
 	public void setDatabases(Vector<CDatabase> databases){
 		this.databases = databases;
 	}
+	
+	public void databaseTreeMouseClicked(MouseEvent e){
+		//Busco la linea seleccionada.
+		int selRow = getRowForLocation(e.getX(), e.getY());
+		if(selRow > 0){
+			treePath = getPathForLocation(e.getX(), e.getY());
+			if(isDatabase(treePath))
+				admin.setSelectedDatabase(treePath.getPathComponent(DATABASE_INDEX).toString(), true);
+			else if(isTable(treePath))
+				admin.setSelectedTable(treePath.getPathComponent(DATABASE_INDEX).toString(), treePath.getPathComponent(TABLE_INDEX).toString());
+		}
+	}
+	
+	private boolean isUser(TreePath treePath){
+		return (treePath.getPathCount() == 1);
+	}
+	
+	private boolean isDatabase(TreePath treePath){
+		return (treePath.getPathCount() == 3);
+	}
+	
+	private boolean isTable(TreePath treePath){
+		return (treePath.getPathCount() == 4);
+	}
+	
+	private void vaciar(){
+		dbs.removeAllChildren();
+		users.removeAllChildren();
+		treeModel.reload();
+	}
+	
+	public void refresh(){
+		vaciar();
+		cargarDatos();
+		expandRow(DATABASE_INDEX);
+		repaint();
+	}
+	
 }

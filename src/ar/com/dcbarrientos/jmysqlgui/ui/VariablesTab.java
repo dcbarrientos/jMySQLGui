@@ -16,69 +16,72 @@
  */
 
 /** 
- * Host.java
+ * Variables.java
  *
  * Description:	    <Descripcion>
  * @author			Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
- * Created on 31 de jul. de 2016, 6:45:47 p. m. 
+ * Created on 31 de jul. de 2016, 7:22:14 p. m. 
  */
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.util.ResourceBundle;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
+import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class Host extends JPanel{
+public class VariablesTab extends JPanel{
 	private static final long serialVersionUID = 1L;
-	//private MdiAdmin admin;
 	private CConnection cconnection;
 	private ResourceBundle resource;
+	private int cantidadVariables; 		//Cantidad de variables.
 	
-	private JLabel lblServer;
-	private JTabbedPane tabbedPane;
+	JScrollPane scroll;
+	JTable tableVariables;
 	
-	public Host(CConnection cconnection, ResourceBundle resource){
+	public VariablesTab(CConnection cconnection, ResourceBundle resource){
 		super();
-		//this.admin = admin;
 		this.cconnection = cconnection;
 		this.resource = resource;
+		cantidadVariables = 0;
 		
 		initComponents();
 	}
 	
 	private void initComponents(){
-		lblServer = new JLabel();
-		lblServer.setText("  " + cconnection.getHost() + " " + resource.getString("Host.lblServer") + " " + cconnection.getVersion());
-		lblServer.setForeground(Color.white);
-		lblServer.setBackground(Color.BLACK);
-		lblServer.setOpaque(true);
 		
-		tabbedPane = new JTabbedPane();
+		tableVariables = new JTable();
+		String sql = "SHOW VARIABLES;";
 		
-		Variables variables = new Variables(cconnection, resource);
-		tabbedPane.addTab(resource.getString("Variables.title") + " (" + variables.getCantidadVariables() + ")", variables);
+		String[] headers = {resource.getString("Variables.header1"), resource.getString("Variables.header2")};
 		
-		ProcessList process = new ProcessList(cconnection, resource);
-		tabbedPane.addTab(resource.getString("ProcessList.title") + " (" + process.getCantidadProcesos() + ")", process);
+		CQuery query = new CQuery(cconnection.getConnection());
+		cantidadVariables = query.executeQuery(sql); 
+		if(cantidadVariables > 0){
+			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
+			tableVariables.setModel(cTableModel.getTableModel());
+		}
+		query.cerrar();
 		
-		Status status = new Status(cconnection, resource);
-		tabbedPane.addTab(resource.getString("Status.title") + " (" + status.getCantidadStatus() + ")", status);
-
+		scroll = new JScrollPane();
+		scroll.setViewportView(tableVariables);
+		
 		setLayout(new BorderLayout());
-		add(lblServer, BorderLayout.NORTH);
-		add(tabbedPane, BorderLayout.CENTER);
+		add(scroll);
 	}
 	
+	public int getCantidadVariables(){
+		return cantidadVariables;
+	}
 }

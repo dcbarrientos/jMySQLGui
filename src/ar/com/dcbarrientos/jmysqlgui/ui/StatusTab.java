@@ -35,12 +35,13 @@ import javax.swing.JTable;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class Status extends JPanel {
+public class StatusTab extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private CConnection cconnection;
 	private ResourceBundle resource;
@@ -49,7 +50,7 @@ public class Status extends JPanel {
 	JScrollPane scroll;
 	JTable tableStatus;
 	
-	public Status(CConnection cconnection, ResourceBundle resource){
+	public StatusTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
 		this.resource = resource;
@@ -66,10 +67,11 @@ public class Status extends JPanel {
 		String[] headers = {resource.getString("Status.header1"), resource.getString("Status.header2")};
 		
 		CQuery query = new CQuery(cconnection.getConnection());
-		query.setHeaders(headers);
+		//query.setHeaders(headers);
 		cantidadStatus = query.executeQuery(sql); 
 		if(cantidadStatus > 0){
-			tableStatus.setModel(query.getModel());			
+			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
+			tableStatus.setModel(cTableModel.getTableModel());
 		}
 		query.cerrar();
 		

@@ -51,12 +51,13 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class QueryEditor extends JPanel{
+public class QueryEditorTab extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private JLabel lblDescription = new JLabel();
 	private JSplitPane jSplitPane;
@@ -72,7 +73,7 @@ public class QueryEditor extends JPanel{
 	private CConnection cconnection;
 	private ResourceBundle resource;
 	
-	public QueryEditor(CConnection cconnection, ResourceBundle resource)
+	public QueryEditorTab(CConnection cconnection, ResourceBundle resource)
 	{
 		super();
 		
@@ -96,7 +97,7 @@ public class QueryEditor extends JPanel{
 		lblDescription.setText(resource.getString("QueryEditor.lblDescription"));
 		lblDescription.setOpaque(true);
 		lblDescription.setForeground(Color.white);
-		lblDescription.setBackground(Color.black);
+		lblDescription.setBackground(new Color(112, 146, 190));
 
 		textArea = new RSyntaxTextArea();
 		textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_SQL);
@@ -138,7 +139,8 @@ public class QueryEditor extends JPanel{
 	private void executeQuery(){
 		CQuery query = new CQuery(cconnection.getConnection());
 		if(query.executeQuery(textArea.getText()) > 0){
-			jtblSqlResult.setModel(query.getModel());
+			CTableModel cTableModel = new CTableModel(query.getDatos(), query.getHeaders());
+			jtblSqlResult.setModel(cTableModel.getTableModel());
 			jtblSqlResult.repaint();
 			//TODO Agregar la consulta en el cuadro de texto.
 		}else{
@@ -146,20 +148,5 @@ public class QueryEditor extends JPanel{
 		}
 		query.cerrar();
 		
-		/*
-		CQuery query = new CQuery(con.getConexion(), principal.getCurrentDatabase());
-		int cc = query.executeQuery(textArea.getText());
-		if(cc < 0){
-			jtblSqlResult.setModel(new DefaultTableModel());
-			String err = "Error(" + query.getErrorCode() + "): " + query.getErrorMsg();
-			principal.addMessage(err, textArea.getText());
-		}else{		
-			TableModel tm = query.getTableModel();
-			if(tm != null)
-				jtblSqlResult.setModel(tm);
-			query.close();
-			jtblSqlResult.repaint();
-			principal.addMessageSql(textArea.getText());
-		}*/
 	}
 }

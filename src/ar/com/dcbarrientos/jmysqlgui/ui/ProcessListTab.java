@@ -16,12 +16,12 @@
  */
 
 /** 
- * Variables.java
+ * ProcessList.java
  *
  * Description:	    <Descripcion>
  * @author			Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
- * Created on 31 de jul. de 2016, 7:22:14 p. m. 
+ * Created on 31 de jul. de 2016, 8:26:56 p. m. 
  */
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
@@ -35,52 +35,58 @@ import javax.swing.JTable;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class Variables extends JPanel{
+public class ProcessListTab extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private CConnection cconnection;
 	private ResourceBundle resource;
-	private int cantidadVariables; 		//Cantidad de variables.
+	private int cantidadProcesos; 		//Cantidad de variables.
 	
 	JScrollPane scroll;
-	JTable tableVariables;
+	JTable tableProcesos;
 	
-	public Variables(CConnection cconnection, ResourceBundle resource){
+	public ProcessListTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
 		this.resource = resource;
-		cantidadVariables = 0;
+		cantidadProcesos = 0;
 		
 		initComponents();
 	}
 	
 	private void initComponents(){
 		
-		tableVariables = new JTable();
-		String sql = "SHOW VARIABLES;";
+		tableProcesos= new JTable();
+		String sql = "SHOW PROCESSLIST;";
 		
-		String[] headers = {resource.getString("Variables.header1"), resource.getString("Variables.header2")};
+		String[] headers = {resource.getString("ProcessList.cabezaTabla1"), resource.getString("ProcessList.cabezaTabla2"), 
+				resource.getString("ProcessList.cabezaTabla3"), resource.getString("ProcessList.cabezaTabla4"), 
+				resource.getString("ProcessList.cabezaTabla5"), resource.getString("ProcessList.cabezaTabla6"), 
+				resource.getString("ProcessList.cabezaTabla7"), resource.getString("ProcessList.cabezaTabla8")};
 		
 		CQuery query = new CQuery(cconnection.getConnection());
-		query.setHeaders(headers);
-		cantidadVariables = query.executeQuery(sql); 
-		if(cantidadVariables > 0){
-			tableVariables.setModel(query.getModel());			
+		//query.setHeaders(headers);
+		cantidadProcesos = query.executeQuery(sql); 
+		if(cantidadProcesos > 0){
+			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
+			tableProcesos.setModel(cTableModel.getTableModel());			
 		}
 		query.cerrar();
 		
 		scroll = new JScrollPane();
-		scroll.setViewportView(tableVariables);
+		scroll.setViewportView(tableProcesos);
 		
 		setLayout(new BorderLayout());
 		add(scroll);
 	}
 	
-	public int getCantidadVariables(){
-		return cantidadVariables;
+	public int getCantidadProcesos(){
+		return cantidadProcesos;
 	}
+
 }

@@ -28,13 +28,9 @@ package ar.com.dcbarrientos.jmysqlgui.database;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-
-import java.sql.ResultSetMetaData;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -114,12 +110,7 @@ public class CQuery {
 		return datos;		
 	}
 	
-	public void setHeaders(String[] headers){
-		this.headers = headers;
-		customHeaders = true;
-	}
-	
-	private String[] getHeaders(){
+	public String[] getHeaders(){
 		if(!customHeaders){
 			headers = new String[columnCount];
 			try{
@@ -132,37 +123,7 @@ public class CQuery {
 		}
 		return headers;
 	}
-	
-	public TableModel getModel(){
-		String[] headers = getHeaders();
-		datos =getDatos();
-		TableModel tm = new AbstractTableModel(){
-			private static final long serialVersionUID = 1L;
 
-			@Override
-			public int getRowCount() {
-				return rowCount;
-			}
-
-			@Override
-			public int getColumnCount() {
-				return columnCount;
-			}
-
-			@Override
-			public Object getValueAt(int rowIndex, int columnIndex) {
-				return datos[rowIndex][columnIndex];
-			}
-			
-			@Override
-			public String getColumnName(int columnIndex){
-				return headers[columnIndex];
-			}
-		};
-		
-		return tm;
-	}
-	
 	private void error(int code, String msg){
 		errCode = code;
 		errMsg = msg;
