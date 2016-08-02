@@ -49,6 +49,10 @@ public class CQuery {
 	private boolean customHeaders;		//Verdadero si se uso setHeaders.
 	private String[] headers;			//Nombres de las columnas.
 	
+	/**
+	 * Constructor del objeto CQuery el cual maneja las consultas.
+	 * @param connection Conexión abierta.
+	 */
 	public CQuery(Connection connection){
 		this.connection = connection;
 		customHeaders = false;
@@ -83,6 +87,9 @@ public class CQuery {
 		return rowCount;
 	}
 	
+	/**
+	 * Cierra la consulta, y el statement generados.
+	 */
 	public void cerrar(){
 		try {
 			if(result != null)
@@ -94,6 +101,11 @@ public class CQuery {
 		}
 	}
 	
+	/**
+	 * A partir de un ResultSet generado en executeQuery se genera un array con
+	 * los datos resultantes.
+	 * @return Devuelve un array con los datos de la consulta.
+	 */
 	public Object[][] getDatos(){
 		datos = new Object[rowCount][columnCount];
 		int f = 0;
@@ -110,6 +122,9 @@ public class CQuery {
 		return datos;		
 	}
 	
+	/**
+	 * @return Devuelve un array con los nombres de los campos resultantes de la consulta.
+	 */
 	public String[] getHeaders(){
 		if(!customHeaders){
 			headers = new String[columnCount];
@@ -124,19 +139,33 @@ public class CQuery {
 		return headers;
 	}
 
+	/**
+	 * Carga en las variables que almacenan los errores.
+	 * @param code Código del error.
+	 * @param msg Mensaje del error correspondiente al código.
+	 */
 	private void error(int code, String msg){
 		errCode = code;
 		errMsg = msg;
 	}
 	
+	/**
+	 * @return Devuelve el código del error.
+	 */
 	public int getErrCode(){
 		return errCode;
 	}
 	
+	/**
+	 * @return  Devuelve el mensaje del error.
+	 */
 	public String getErrMsg(){
 		return errMsg;
 	}
 	
+	/**
+	 * @return Devuelve el ResultSet con el resultado de la consulta.
+	 */
 	public ResultSet getResultSet(){
 		return result;
 	}

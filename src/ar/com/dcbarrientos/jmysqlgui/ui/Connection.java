@@ -73,6 +73,11 @@ public class Connection extends JDialog{
     ResourceBundle resource;
     CConnection cconnection;
     
+	/**
+	 * Constructor de la ventana  que pide los datos de la conexión.
+	 * @param principal Padre de la ventana.
+	 * @param modal Verdadero si la ventana es modal.
+	 */
 	public Connection(Principal principal, boolean modal){
 		super(principal, modal);
 		this.principal = principal;
@@ -82,7 +87,7 @@ public class Connection extends JDialog{
 	}
 	
 	/**
-	 * Create the dialog.
+	 * Inicializo la interfaz gráfica.
 	 */
 	private void initComponents() {
 		cconnection = new CConnection();
@@ -234,20 +239,36 @@ public class Connection extends JDialog{
         setLocationRelativeTo(principal);
 	}
 	
+	/**
+	 * Muestra la ventana, este procedimiento es usado para que una vez
+	 * que se cierra la ventana devuelva la conexión.
+	 * @return Devuelve el objeto con la conexión abierta.
+	 */
 	public CConnection showDialog(){
 		setVisible(true);
 		return cconnection;
 	}
 
+	/**
+	 * @return Devuelve la conexión abierta.
+	 */
 	public CConnection getCConnection(){
 		return cconnection;
 	}
 
+	/**
+	 * Procedimiento que trata el evento click en el Boton cancelar.
+	 * @param e Evento disparado.
+	 */
 	private void btnCancelMouseClicked(MouseEvent e){
 		setVisible(false);
 		dispose();
 	}
 	
+	/**
+	 * Procedimiento que trata el evento click en el Boton conectar.
+	 * @param e Evento disparado.
+	 */
 	private void btnConnectMouseClicked(MouseEvent e){
 		if(cconnection.conectar(txtHost.getText(), txtUser.getText(), new String(txtPass.getPassword()), Integer.parseInt(txtPort.getText()), txtDatabase.getText())){
 			setVisible(false);

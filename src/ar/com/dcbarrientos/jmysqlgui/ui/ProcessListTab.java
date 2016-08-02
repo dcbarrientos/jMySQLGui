@@ -50,6 +50,11 @@ public class ProcessListTab extends JPanel{
 	JScrollPane scroll;
 	JTable tableProcesos;
 	
+	/**
+	 * Construye una lista de procesos del servidor.
+	 * @param cconnection Conexión establecida.
+	 * @param resource ResourceBundle en donde estan los string de la aplicación.
+	 */
 	public ProcessListTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
@@ -59,6 +64,9 @@ public class ProcessListTab extends JPanel{
 		initComponents();
 	}
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		
 		tableProcesos= new JTable();
@@ -85,6 +93,9 @@ public class ProcessListTab extends JPanel{
 		add(scroll);
 	}
 	
+	/**
+	 * @return Devuelve la cantidad de procesos.
+	 */
 	public int getCantidadProcesos(){
 		return cantidadProcesos;
 	}

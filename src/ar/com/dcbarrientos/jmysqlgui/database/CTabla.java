@@ -27,6 +27,9 @@
 package ar.com.dcbarrientos.jmysqlgui.database;
 
 import java.sql.Connection;
+import java.text.DecimalFormat;
+
+import org.mozilla.javascript.ast.ReturnStatement;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -50,9 +53,15 @@ public class CTabla {
 	private String Create_options;
 	private String Comment;
 	
+	
 	private String databaseName;
 	
-	
+	/**
+	 * Constructor de la estructura CTable que contiene toda la información de una tabla.
+	 * @param name Nombre de la tabla.
+	 * @param databaseName Nombre de la base de datos a la que pertenece.
+	 * @param connection Conexión abierta.
+	 */
 	public CTabla(String name, String databaseName, Connection connection){
 		this.name = name;
 		this.databaseName = databaseName;
@@ -290,7 +299,6 @@ public class CTabla {
 	public void setComment(String comment) {
 		Comment = comment;
 	}
-	
 	
 	
 }

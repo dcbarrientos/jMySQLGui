@@ -69,20 +69,28 @@ public class QueryEditorTab extends JPanel{
 	private JButton btnNewButton;
 	private JPanel panel;
 		
-//	private Principal principal;
 	private CConnection cconnection;
 	private ResourceBundle resource;
+	private MdiAdmin admin;
 	
-	public QueryEditorTab(CConnection cconnection, ResourceBundle resource)
+	/**
+	 * Construye un Panel con el editor de Consultas.
+	 * @parma admin JPanel padre. Es necesario para mostrar mensajes en el panel inferior.
+	 * @param cconnection Conexión abierta.
+	 * @param resource ResourceBundle con los string de la aplicación.
+	 */
+	public QueryEditorTab(MdiAdmin admin, CConnection cconnection, ResourceBundle resource)
 	{
 		super();
-		
-//		principal = princ;
+		this.admin = admin;
 		this.cconnection = cconnection;
 		this.resource = resource;
 		initComponents();
 	} 
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		Object[][] data = {{""}};
 		String[] header = {""};
@@ -136,17 +144,28 @@ public class QueryEditorTab extends JPanel{
 		toolBar.add(btnNewButton);
 	}
 	
+	/**
+	 * Ejecuta la consulta del editor de SQL
+	 */
 	private void executeQuery(){
+		String sql = getSQLText();
 		CQuery query = new CQuery(cconnection.getConnection());
-		if(query.executeQuery(textArea.getText()) > 0){
+		if(query.executeQuery(sql) > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), query.getHeaders());
 			jtblSqlResult.setModel(cTableModel.getTableModel());
 			jtblSqlResult.repaint();
-			//TODO Agregar la consulta en el cuadro de texto.
+			admin.addSQL(sql);
 		}else{
-			//TODO Mensaje de error
+			admin.addError(query.getErrCode() + ": " + query.getErrMsg(), sql);
 		}
 		query.cerrar();
 		
+	}
+	
+	/**
+	 * @return Devuelve la consulta a ejecutar.
+	 */
+	private String getSQLText(){
+		return textArea.getText();
 	}
 }

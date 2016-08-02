@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -41,17 +42,32 @@ import javax.swing.JTabbedPane;
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import javax.swing.JList;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class MdiAdmin extends JPanel{
+/**
+ * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
+ *
+ */
+/**
+ * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
+ *
+ */
+public class MdiAdmin extends JPanel{	
+	private static final long serialVersionUID = 1L;
+
 	private final static int DATABASE_TAB_INDEX = 1;
 	private final static int TABLE_TAB_INDEX = 2;
 	private final static int DATOS_TAB_INDEX = 3;
 	
-	private static final long serialVersionUID = 1L;
+	JList<String> lstSQL;
+	DefaultListModel<String> lstSQLModel;
+	JList<String> lstMensajes;
+	DefaultListModel<String> lstMensajesModel;
+	
 	private CConnection connection;
 	private ResourceBundle resource;
 	private Vector<CDatabase> databases;
@@ -71,7 +87,22 @@ public class MdiAdmin extends JPanel{
 	}
 	
 	private void initComponents(){
-		cargarInformacion();
+		JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.BOTTOM);
+
+		JScrollPane scrollPane = new JScrollPane();
+		tabbedPane_1.addTab(resource.getString("MdiAdemin.lstSQLTab.title"), null, scrollPane, null);
+		
+		lstSQLModel = new DefaultListModel<String>();
+		lstSQL = new JList<String>(lstSQLModel);
+		scrollPane.setViewportView(lstSQL);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		tabbedPane_1.addTab(resource.getString("MdiAdemin.lstMensajesTab.title"), null, scrollPane_1, null);
+		
+		lstMensajes = new JList<String>();
+		lstMensajesModel = new DefaultListModel<String>();
+		lstMensajes.setModel(lstMensajesModel);
+		scrollPane_1.setViewportView(lstMensajes);
 		
 		databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
 		
@@ -92,18 +123,27 @@ public class MdiAdmin extends JPanel{
 		
 		//Tab Query Editor
 		ImageIcon queryIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Query.gif"));
-		tabbedPane.addTab(resource.getString("QueryEditor.title"), queryIcon, new QueryEditorTab(connection, resource));
+		tabbedPane.addTab(resource.getString("QueryEditor.title"), queryIcon, new QueryEditorTab(this, connection, resource));
 		panelSuperior.setRightComponent(tabbedPane);
 		
 		
 		JPanel panelInferior = new JPanel();
 		splitPane.setRightComponent(panelInferior);
+		panelInferior.setLayout(new BorderLayout(0, 0));
 
+		panelInferior.add(tabbedPane_1);
+
+		cargarInformacion();
+
+		
 		DatabaseTree dbTree = new DatabaseTree(this, userName, databases, resource);
 		dbTab = new DatabaseTab(this, connection.getConnection());
 		scrollTreeDatabase.setViewportView(dbTree);
 	}
 	
+	/**
+	 * Cargo la información de la base de datos.
+	 */
 	private void cargarInformacion(){
 		userName = getUser();
 		databases = new Vector<CDatabase>();
@@ -111,37 +151,36 @@ public class MdiAdmin extends JPanel{
 		String sql = "SHOW DATABASES";
 		CDatabase cDatabase;
 		if(query.executeQuery(sql)> 0){
+			addSQL(sql);
 			try{
 				ResultSet result = query.getResultSet();
 				while(result.next()){					
-					cDatabase = new CDatabase(result.getString("Database"), connection.getConnection());
+					cDatabase = new CDatabase(this, result.getString("Database"), connection.getConnection());
 					databases.addElement(cDatabase);
 				}
 			}catch(SQLException e){
-				//TODO tratamiento error.
+				addError(e.getErrorCode() + ": " + e.getMessage(), sql);
 			}
 		}
 		query.cerrar();
-		
-		//mostrar();
-	}
-	
-	/*
-	private void mostrar(){
-		for(CDatabase db : databases){
-			System.out.println(db.getName());
-			db.mostrar();
-		}
-	}*/
+			}
 	
 	public void setConnection(CConnection connection){
 		this.connection = connection;
 	}
 	
+	
+	/**
+	 * @return Devuelve el usuario@host de la conexion.
+	 */
 	private String getUser(){
 		return connection.getUserName() + "@" + connection.getHost();
 	}
 	
+	
+	/**
+	 * @return Devuelve el ResourceBundel que contiene los strings de la aplicacion.
+	 */
 	public ResourceBundle getResource(){
 		return resource;
 	}
@@ -167,6 +206,9 @@ public class MdiAdmin extends JPanel{
 	}
 	
 	
+	/**
+	 * Refresca la apariencia después que cambiaron los datos. 
+	 */
 	private void refresh(){
 		revalidate();
 		repaint();
@@ -187,19 +229,54 @@ public class MdiAdmin extends JPanel{
 		return null;
 	}
 	
+	/**
+	 * @return Devuelve la base de datos que está seleccionada.
+	 */
 	private String getSelectedDatabase(){
 		return this.selectedDatabaseName;
 	}
 	
+	/**
+	 * Cambia la tabla seleccionada.
+	 * @param databaseName Nombre de la base de datos en la que está la tabla seleccionada.
+	 * @param tableName Nombre de la tabla seleccionada
+	 */
 	public void setSelectedTable(String databaseName, String tableName){
 		this.selectedDatabaseName = databaseName;
 		this.selectedTableName = tableName;
-		System.out.println("Tabla seleccionada: " + databaseName + "." + tableName);
 	}
 	
+	/**
+	 * @return Devuelve la tabla seleccionada actualmente.
+	 */
 	public String getSelectedTable(){
 		return this.selectedTableName;
 	}
 	
+	/**
+	 * Agrega un mensaje en la solapa mensajes del cuadro inferior.
+	 * @param mensaje Mensaje a mostrar.
+	 */
+	public void addMessage(String mensaje){
+		lstMensajesModel.addElement("[" + getUser() + "] " + mensaje);
+	}
+	
+	/**
+	 * Agrega un mensaje en la solapa SQL del cuadro inferior.
+	 * @param sql SQL a mostrar.
+	 */
+	public void addSQL(String sql){
+		lstSQLModel.addElement("[" + getUser() + "] " + sql);
+	}
+	
+	/**
+	 * Agrega un mensaje de error en la solapa mensajes y una sql en la solapa sql.
+	 * @param error Mensaje a mostrar en solapa mensajes.
+	 * @param sql SQL a mostrar en la solapa SQL.
+	 */
+	public void addError(String error, String sql){
+		addMessage(error);
+		addSQL(sql);
+	}
 	
 }

@@ -29,8 +29,11 @@ package ar.com.dcbarrientos.jmysqlgui.database;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+
+import ar.com.dcbarrientos.jmysqlgui.ui.MdiAdmin;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -38,17 +41,35 @@ import java.util.Map;
  */
 public class CDatabase {
 	private Connection connection = null;
+	private MdiAdmin admin;
 	private String name;
 	private int tableCount;
+	private int databaseSize;
 	
 	private HashMap<String, CTabla> tablas;
 	
-	public CDatabase(String name, Connection connection){
+	public static final int BYTES = 0;
+	public static final int KB = 1;
+	public static final int MB = 2;
+	public static final int GB = 3;
+	
+	
+	/**
+	 * Constructar del controlador que se encarga de cargar la información de la base de datos inigresada.
+	 * @param admin Administrador para poder publicar los mensajes en el cuadro inferior.
+	 * @param name Nombre de la base de datos a cargar.
+	 * @param connection Conexión abierto.
+	 */
+	public CDatabase(MdiAdmin admin, String name, Connection connection){
 		this.connection = connection;
 		this.name = name;
+		this.admin = admin;
 		cargarInformacion();
 	}
 	
+	/**
+	 * Se carga la información de la base de datos especificada en el constructor.
+	 */
 	public void cargarInformacion(){
 		String sql = "SHOW TABLE STATUS FROM  `" + name + "`";
 		CQuery query = new CQuery(connection);
@@ -58,6 +79,7 @@ public class CDatabase {
 			ResultSet result = query.getResultSet();
 			CTabla tabla;
 			tableCount = 0;
+			databaseSize = 0;
 			try {
 				while(result.next()){					
 					tabla = new CTabla(result.getString("Name"), name, connection);
@@ -76,32 +98,77 @@ public class CDatabase {
 					tabla.setCreate_options(result.getString(17));
 					tabla.setComment(result.getString(18));
 					tablas.put(result.getString("Name"), tabla);
+					databaseSize += result.getInt(7);
 					tableCount++;
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				admin.addError(e.getErrorCode() + ": " + e.getMessage(), sql);
 			}			
 		}
 		query.cerrar();
+		admin.addSQL(sql);
 		
 	}
 	
+	/**
+	 * @return Devuelve una estructura de CTablas con la información de las tablas de la base de datos.
+	 */
 	public HashMap<String, CTabla> getTablas(){
 		return tablas;
 	}
 	
+	/**
+	 * @return Devuelve el nombre de la base de datos.
+	 */
 	public String getName(){
 		return name;
 	}
 	
+	/**
+	 * @return Devuelve la cantidad de tablas en la base de datos.
+	 */
 	public int getTableCount(){
 		return tableCount;
 	}
-		
+
+	/**
+	 * Devuelve el tamaño total de la base de datos.
+	 */
+	public int getDatabaseSize(){
+		return databaseSize;
+	}
+	
 	public void mostrar(){
 		for(Map.Entry<String, CTabla> elemento: tablas.entrySet()){
 			System.out.println("\t" + elemento.getKey());
 		}
 	}
+	
+	/**
+	 * Cuando se le ingresa un valor en bytes devuelve su equivalente en la unidad más
+	 * grande posible. 1024 bytes devolvería 1 kb.
+	 * @param nro Valor en bytes para calcular su equivalente.
+	 * @return Devuelve el equibalente más grande posible.
+	 */
+	public static String getTableSize(int nro){
+		float size = nro;
+		int cons = 1024;
+		int unidad = 0;
+		
+		while(size > cons){
+			size /= cons;
+			unidad++;
+		}
+
+		DecimalFormat dec = new DecimalFormat("0.00");
+		if(unidad == BYTES)
+			return dec.format(size).concat(" B.");
+		else if(unidad == KB)
+			return dec.format(size).concat(" Kb.");
+		else if(unidad == MB)
+			return dec.format(size).concat(" Mb.");
+	
+		return dec.format(size).concat(" Gb.");
+	}
+
 }

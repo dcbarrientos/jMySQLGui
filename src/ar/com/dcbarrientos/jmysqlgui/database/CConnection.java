@@ -60,10 +60,22 @@ public class CConnection {
 	private String errMsg;
 	private boolean isConnected;
 	
+	/**
+	 * Constructor de CConnection
+	 */
 	public CConnection(){
 		isConnected = false;
 	}
 	
+	/**
+	 * Intenta establecer una conexión con el servidor de bases de datos.
+	 * @param host Host de la base de datos
+	 * @param user Usuario de la base de datos 
+	 * @param pass Password del usuario
+	 * @param port Puerto del servidor de bases de datos
+	 * @param database Nombre/s de la/s base/s de datos.
+	 * @return Verdadero si se pudo establecer la conexión.
+	 */
 	public boolean conectar(String host, String user, String pass, int port, String database){
 		isConnected = false;
 		this.host = host;
@@ -89,6 +101,11 @@ public class CConnection {
 		return isConnected;
 	}
 	
+	/**
+	 * Se le comunica a la conexión abierta la selección de una tabla
+	 * @param databaseName Nombre de la base de datos seleccionada.
+	 * @return Verdadero si se ejecuto exitosamente la selección.
+	 */
 	public boolean setSelectedDatabase(String databaseName){
 		try {
 			connection.setCatalog(databaseName);
@@ -100,19 +117,34 @@ public class CConnection {
 		return false;
 	}
 	
+	/**
+	 * Se almancenan en las variables de error los contenidos del mismo.
+	 * @param code Código de error generado.
+	 * @param msg Mensaje del error correspondiente al código.
+	 */
 	private void error(int code, String msg){
 		this.errCode = code;
 		this.errMsg = msg;
 	}
 	
+	/**
+	 * @return Devuelve el código de error generado.
+	 */
 	public int getErrCode(){
 		return errCode;
 	}
 	
+	/**
+	 * @return Devuelve el mensaje del error generado.
+	 */
 	public String getErrorMsg(){
 		return errMsg;
 	}
 	
+	/**
+	 * @return Devuelve la base de datos seleccionada en la conexión abierta. Vacío si
+	 * no hay base de datos seleccionada.
+	 */
 	public String getSelectedDatabase(){
 		String dbName = "";
 		try {
@@ -123,6 +155,9 @@ public class CConnection {
 		return dbName;
 	}
 
+	/**
+	 * @return Devuelve la url de la conexión a la base de datos de tipo jdbc:subprotocol:subname 
+	 */
 	private String getUrlExtendida(){
 		String txtUrl = URL + host + ":" + Integer.toString(port) + "/" + database;
 

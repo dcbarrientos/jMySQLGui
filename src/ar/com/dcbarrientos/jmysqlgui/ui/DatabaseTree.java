@@ -50,6 +50,7 @@ import ar.com.dcbarrientos.jmysqlgui.database.CTabla;
  */
 public class DatabaseTree extends JTree{
 	private static final long serialVersionUID = 1L;
+	
 	private Vector<CDatabase> databases;			//Estructura de base de datos.
 	private String user;							//Usuario conectado a la base de datos
 	//private Connection connection;						//Conexion abierta.
@@ -76,6 +77,15 @@ public class DatabaseTree extends JTree{
 		initComponents();
 	}
 	*/
+	
+	/**
+	 * Constructor del panel que contiene las bases de datos y sus respectivas tablas. Este
+	 * panel se muestra en el cuadro superior a la izquierda con un JTree. 
+	 * @param admin Padre de este panel.
+	 * @param user User y host de la conexion.
+	 * @param databases Estructura con las bases de datos del servidor.
+	 * @param resource ResourceBundle que contiene los strings de la aplicación.
+	 */
 	public DatabaseTree(MdiAdmin admin, String user, Vector<CDatabase> databases, ResourceBundle resource){
 		super();
 		addMouseListener(new MouseAdapter() {
@@ -92,6 +102,9 @@ public class DatabaseTree extends JTree{
 		initComponents();
 	}
 
+	/**
+	 * Inicilizo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		id = new DefaultMutableTreeNode(user);
 		treeModel = new DefaultTreeModel(id);
@@ -113,6 +126,9 @@ public class DatabaseTree extends JTree{
 		this.setModel(treeModel);
 	}
 	
+	/**
+	 * Genero los nodos que compondrán el JTree.
+	 */
 	private void cargarDatos(){
 		DefaultMutableTreeNode dbNode;
 		DefaultMutableTreeNode tbNode;
@@ -132,14 +148,26 @@ public class DatabaseTree extends JTree{
 		}
 	}
 	
+	/**
+	 * Setter de user.
+	 * @param user Valor que tendrá user (user@host).
+	 */
 	public void setUser(String user){
 		this.user = user;
 	}
 	
+	/**
+	 * Setter de la estructura con las bases de datos.
+	 * @param databases Bases de datos del servidor.
+	 */
 	public void setDatabases(Vector<CDatabase> databases){
 		this.databases = databases;
 	}
 	
+	/**
+	 * Procedimiento que maneja el evneto de click en el JTree.
+	 * @param e Evento disparado.
+	 */
 	public void databaseTreeMouseClicked(MouseEvent e){
 		//Busco la linea seleccionada.
 		int selRow = getRowForLocation(e.getX(), e.getY());
@@ -152,24 +180,45 @@ public class DatabaseTree extends JTree{
 		}
 	}
 	
+	/**
+	 * Verifica si el nodo ingresado es de tipo usuario
+	 * @param treePath Nodo seleccionado
+	 * @return Verdadero si es un nodo tipo user
+	 */
 	private boolean isUser(TreePath treePath){
 		return (treePath.getPathCount() == 1);
 	}
-	
+		
+	/**
+	 * Verifica si el nodo ingresado es de tipo database
+	 * @param treePath Nodo seleccionado
+	 * @return Verdadero si es un nodo tipo database
+	 */
 	private boolean isDatabase(TreePath treePath){
 		return (treePath.getPathCount() == 3);
 	}
 	
+	/**
+	 * Verifica si el nodo ingresado es de tipo tabla
+	 * @param treePath Nodo seleccionado
+	 * @return Verdadero si es un nodo tipo tabla
+	 */
 	private boolean isTable(TreePath treePath){
 		return (treePath.getPathCount() == 4);
 	}
 	
+	/**
+	 * Vacia el JTree.
+	 */
 	private void vaciar(){
 		dbs.removeAllChildren();
 		users.removeAllChildren();
 		treeModel.reload();
 	}
 	
+	/**
+	 * Actualiza el JTree. 
+	 */
 	public void refresh(){
 		vaciar();
 		cargarDatos();

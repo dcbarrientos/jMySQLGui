@@ -29,13 +29,11 @@ package ar.com.dcbarrientos.jmysqlgui.ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -49,9 +47,7 @@ import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CTabla;
@@ -62,13 +58,17 @@ import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
  *
  */
 public class DatabaseTab extends JPanel{
+	private static final long serialVersionUID = 1L;
+
+	//Iconos
 	private ImageIcon viewDataIcon;
 	private ImageIcon tablePropertiesIcon;
 	private ImageIcon insertRecordIcon;
 	private ImageIcon emptyTableIcon;
 	private ImageIcon dropTableIcon;
 	private ImageIcon copyTableIcon;
-	private static final long serialVersionUID = 1L;
+	
+	//Interfaz gráfica.
 	private JTable jTable1 = new JTable();
 	private JLabel jLabel1 = new JLabel();
 	private JToolBar toolbar = new JToolBar();
@@ -79,6 +79,7 @@ public class DatabaseTab extends JPanel{
 	private JButton jbDropTable = new JButton();
 	private JButton jbCopyTable = new JButton();	
 	private JScrollPane scrollpane;
+	
 	private MdiAdmin admin;
 	
 	private Connection connection;
@@ -90,6 +91,12 @@ public class DatabaseTab extends JPanel{
 	private CDatabase database;
 
 
+	/**
+	 * Constructor de panel para la solapa Database que contiene todas las tablas de 
+	 * la base de datos.
+	 * @param admin Padre de la tab que va a contener este panel.
+	 * @param connection conexión abierta.
+	 */
 	public DatabaseTab(MdiAdmin admin, Connection connection) 
 	{
 		super();
@@ -142,6 +149,10 @@ public class DatabaseTab extends JPanel{
 		});
 	}
 
+	/**
+	 * Selecciona una base de datos. Carga todas las tablas en una JTable.
+	 * @param database Objeto CDatabase seleccionada.
+	 */
 	public void setDatabase(CDatabase database){
 		this.database = database;
 		CTableModel cTableModel= new CTableModel(getDatos(), getHeaders());
@@ -162,6 +173,10 @@ public class DatabaseTab extends JPanel{
 		mShown = true;
 	}
 
+	/**
+	 * Genera un array con todas las tablas y sus respectivos datos.
+	 * @return array de tablas.
+	 */
 	private Object[][] getDatos(){	
 		HashMap<String, CTabla> tablas = database.getTablas();
 		SortedSet<String> keys = new TreeSet<String>(tablas.keySet());
@@ -176,7 +191,7 @@ public class DatabaseTab extends JPanel{
 			datos[fila][2] = elemento.getRow_format();
 			datos[fila][3] = elemento.getRows();
 			datos[fila][4] = elemento.getAvg_row_length();
-			datos[fila][5] = elemento.getData_length();
+			datos[fila][5] = CDatabase.getTableSize(elemento.getData_length());
 			datos[fila][6] = elemento.getMax_data_length();
 			datos[fila][7] = elemento.getIndex_length();
 			datos[fila][8] = elemento.getData_free();
@@ -192,6 +207,9 @@ public class DatabaseTab extends JPanel{
 		return datos;
 	}
 	
+	/**
+	 * @return Devuelve un vector con los nombres de los campos devueltos con getDatos();
+	 */
 	private String[] getHeaders(){
 		String[] headers = {"Name", "Type", "Row_format", "Rows", "Avg_row_length", 
 				"Data_length", "Max_data_length", "Index_length", "Data_free", "Auto_increment", 
@@ -200,10 +218,16 @@ public class DatabaseTab extends JPanel{
 		return headers;
 	}
 
+	
+	/**
+	 * Establece la visibilidad de este panel
+	 * @param visible Verdadero si el panel es visible.
+	 */
 	public void setDVisible(boolean visible)
 	{	setVisible(false);
 		repaint();	
 	}	
+	
 	/*
 	public void updateDatabase(int idnombre)
 	{	
@@ -214,6 +238,9 @@ public class DatabaseTab extends JPanel{
 		jTable1.repaint();
 	}*/
 	
+	/**
+	 * Crea la barra de herramientas de este panel. 
+	 */
 	public void crearToolBar()
 	{
 		toolbar.add(jbViewData);
@@ -301,6 +328,11 @@ public class DatabaseTab extends JPanel{
 		});
 	}
 	
+	
+	/**
+	 * Habilita o deshabilita ciertos botones de la barra de herramientas dependiendo
+	 * de si hay una tabla seleccionada o no.
+	 */
 	public void actualizarToolBar()
 	{
 		int i = jTable1.getSelectedRow();
@@ -317,6 +349,9 @@ public class DatabaseTab extends JPanel{
 		jbCopyTable.setEnabled(valor);
 	}
 	
+	/**
+	 * Hace visible la solapa que contiene los datos de la tabla seleccionada.
+	 */
 	public void mostrarDatos()
 	{		
 		String valor = (String) jTable1.getValueAt(filaSeleccionada, 0);
@@ -324,6 +359,9 @@ public class DatabaseTab extends JPanel{
 		//principal.mostrarDatos(valor);
 	}
 	
+	/**
+	 * Hace visible la solapa que contiene la estructura de la tabla seleccionada.
+	 */
 	public void mostrarEstructura()
 	{
 		String valor = (String) jTable1.getValueAt(filaSeleccionada, 0);
@@ -331,6 +369,9 @@ public class DatabaseTab extends JPanel{
 		//principal.mostrarEstructura(valor);
 	}
 	
+	/**
+	 * Carga la ventana hace la copia de la tabla seleccionada.
+	 */
 	public void copiarTabla()
 	{
 		String nombreTabla = (String) jTable1.getValueAt(filaSeleccionada, 0);
@@ -345,18 +386,27 @@ public class DatabaseTab extends JPanel{
 		//cpTable.setVisible(true);
 	}
 	
+	/**
+	 * Elimina todos los datos de la tabla seleccionada.
+	 */
 	public void vaciarTabla()
 	{
 		//TODO todavia no hice este proc.
 		//principal.vaciarTabla();
 	}
 	
+	/**
+	 * Elimina la tabla seleccionada de la base de datos.
+	 */
 	public void borrarTabla()
 	{
 		//TODO todavia no hice este proc.
 		//principal.borrarTabla();
 	}
 	
+	/**
+	 * @return Devuelve el nobre de la/s tabla/s seleccionada/s.
+	 */
 	public String getTablaSelected()
 	{
 		String valor = "";
@@ -372,6 +422,9 @@ public class DatabaseTab extends JPanel{
 		return valor;
 	}
 	
+	/**
+	 * @return Devuelve la cantidad de tablas seleccionadas.
+	 */
 	public int getNumeroSeleccionadas()
 	{
 		return jTable1.getSelectedRowCount();
@@ -382,6 +435,9 @@ public class DatabaseTab extends JPanel{
 		updateDatabase(baseActual);		
 	}	
 */
+	/**
+	 * Estable el ancho que debe tener cada columna dependiendo del contenido.
+	 */
 	public void setColumnWidth()
 	{
 		TableColumn column = null;
@@ -406,10 +462,17 @@ public class DatabaseTab extends JPanel{
 		}	
 	}
 	
+	/**
+	 * @return Devuelve un array con los índices de las tablas seleccionadas.
+	 */
 	public int[] getSelectedTables(){
 		return jTable1.getSelectedRows();
 	}
 	
+	/**
+	 * @param index Indice de la tabla de la cual quiero obtener el nombre.
+	 * @return Nombre de la tabla que está en la posición index.
+	 */
 	public String getDatabaseAt(int index){
 		return (String)jTable1.getValueAt(index, 0);
 	}

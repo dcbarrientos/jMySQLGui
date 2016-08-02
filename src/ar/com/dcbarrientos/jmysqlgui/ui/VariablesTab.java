@@ -81,6 +81,9 @@ public class VariablesTab extends JPanel{
 		add(scroll);
 	}
 	
+	/**
+	 * @return Devuelve la cantidad de variables del sistema.
+	 */
 	public int getCantidadVariables(){
 		return cantidadVariables;
 	}

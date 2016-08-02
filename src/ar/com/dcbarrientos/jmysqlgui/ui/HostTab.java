@@ -49,6 +49,11 @@ public class HostTab extends JPanel{
 	private JLabel lblServer;
 	private JTabbedPane tabbedPane;
 	
+	/**
+	 * Constructor de la solapa Host.
+	 * @param cconnection Conexión abierta
+	 * @param resource ResourceBundle que contiene los strings de la aplicación.
+	 */
 	public HostTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		//this.admin = admin;
@@ -58,6 +63,9 @@ public class HostTab extends JPanel{
 		initComponents();
 	}
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		lblServer = new JLabel();
 		lblServer.setText("  " + cconnection.getHost() + " " + resource.getString("Host.lblServer") + " " + cconnection.getVersion());

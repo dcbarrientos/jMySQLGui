@@ -50,6 +50,11 @@ public class StatusTab extends JPanel {
 	JScrollPane scroll;
 	JTable tableStatus;
 	
+	/**
+	 * Constructor del Panel con las variables de Status del servidor.
+	 * @param cconnection Conexión abierta
+	 * @param resource	ResourceBundle en el que se encuentran los string de la aplicación.
+	 */
 	public StatusTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
@@ -59,6 +64,9 @@ public class StatusTab extends JPanel {
 		initComponents();
 	}
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		
 		tableStatus= new JTable();
@@ -82,6 +90,10 @@ public class StatusTab extends JPanel {
 		add(scroll);
 	}
 	
+	
+	/**
+	 * @return Devuelve la cantidad de Status del servidor.
+	 */
 	public int getCantidadStatus(){
 		return cantidadStatus;
 	}

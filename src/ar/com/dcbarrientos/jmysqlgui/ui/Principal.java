@@ -34,6 +34,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -42,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSeparator;
+import javax.swing.JToolBar;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -102,6 +104,23 @@ public class Principal extends JFrame {
 	private JMenu jMenuImportSaveData;
 	private JMenuItem jMenuImportSaveDataCSV;
 	private JMenuItem jMenuImportSaveDataHTML;
+	
+	private JToolBar toolBar;
+	private JButton jbConnection;
+	private JButton jbClose;
+	//JButton jbCopy = new JButton();
+	//JButton jbCopyAsCSV = new JButton();
+	//JButton jbPaste = new JButton();
+	//JButton jbSaveAsCSV = new JButton();
+	private JButton jbCreateDatabase;
+	private JButton jbCreateTable;
+	private JButton jbDropDatabase;
+	private JButton jbDropTable;
+	private JButton jbRefresh;
+	private JButton jbReloadPrivileges;
+	//JButton jbImportTextfile = new JButton();
+	//JButton jbExportTableODBC = new JButton();
+	private JButton jbAcercade;	
 	
 	public ImageIcon addFieldIcon;
 	public ImageIcon closeIcon;
@@ -168,12 +187,19 @@ public class Principal extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Constructor de la ventana Principal.
+	 * @param resource ResourceBundle que contiene los strings de la aplicación.
+	 */
 	public Principal(ResourceBundle resource){
 		this.resource = resource;
 		
 		initComponents();
 	}
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		isConnected = false;
 		loadImages();
@@ -181,7 +207,6 @@ public class Principal extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setJMenuBar(getMenuPrincipal());
-		updateEstadoConexion();
 		
 		desktop = new JPanel();
 		desktop.setBackground(new Color(112, 146, 190));
@@ -189,9 +214,13 @@ public class Principal extends JFrame {
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(desktop, BorderLayout.CENTER);
-		
+		getContentPane().add(getToolBar(), BorderLayout.PAGE_START);
+		updateEstadoConexion();		
 	}
 	
+	/**
+	 * @return Devuelve el menú principal de la aplicación.
+	 */
 	private JMenuBar getMenuPrincipal(){
 		menuPrincipal = new JMenuBar();
 		menuPrincipal.setVisible(true);
@@ -265,6 +294,144 @@ public class Principal extends JFrame {
 		return menuPrincipal;
 	}
 
+	/**
+	 * @return Devuelve la barra de herramientas.
+	 */
+	private JToolBar getToolBar(){
+		/*
+			JButton jbCopy = new JButton();
+			JButton jbCopyAsCSV = new JButton();
+			JButton jbPaste = new JButton();
+			JButton jbSaveAsCSV = new JButton();
+		
+			JButton jbRefresh = new JButton();
+			JButton jbReloadPrivileges = new JButton();
+			JButton jbImportTextfile = new JButton();
+			JButton jbExportTableODBC = new JButton();
+			JButton jbAcercade = new JButton();
+		*/		
+		jbConnection = new JButton();
+		jbConnection.setIcon(connectionIcon);
+		jbConnection.setToolTipText("Connection");
+		//jbConnection.setMargin(insets0);
+		jbConnection.getAccessibleContext().setAccessibleName("Connection");
+		jbConnection.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//nuevaConexion();
+			}
+		});
+		
+		jbClose = new JButton();
+		jbClose.setIcon(closeIcon);
+		jbClose.setToolTipText("Close Connection");
+		//jbClose.setMargin(insets0);
+		jbClose.getAccessibleContext().setAccessibleName("Close connection");
+		jbClose.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//cerrarConexion();
+			}
+		});
+		
+		jbCreateDatabase = new JButton();
+		jbCreateDatabase.setIcon(createDatabaseIcon);
+		jbCreateDatabase.setToolTipText("Create Database...");
+		//jbCreateDatabase.setMargin(insets0);
+		jbCreateDatabase.getAccessibleContext().setAccessibleName("Create a new database");
+		jbCreateDatabase.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//nuevaDatabase();
+			}
+		});
+		
+		jbCreateTable = new JButton();
+		jbCreateTable.setIcon(createTableIcon);
+		jbCreateTable.setToolTipText("Create Table...");
+		//jbCreateTable.setMargin(insets0);
+		jbCreateTable.getAccessibleContext().setAccessibleName("Create a new table.");
+		jbCreateTable.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//nuevaTabla();
+			}
+		});
+		
+		jbDropDatabase = new JButton();
+		jbDropDatabase.setIcon(dropDatabaseIcon);
+		jbDropDatabase.setToolTipText("Drop Database...");
+		//jbDropDatabase.setMargin(insets0);
+		jbDropDatabase.getAccessibleContext().setAccessibleName("Drop database.");
+		jbDropDatabase.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				//borrarDatabase();
+			}
+		});
+		
+		jbDropTable = new JButton();
+		jbDropTable.setIcon(dropTableIcon);
+		jbDropTable.setToolTipText("Drop Table...");
+		//jbDropTable.setMargin(insets0);
+		jbDropTable.getAccessibleContext().setAccessibleName("Drop table.");
+		
+		jbRefresh = new JButton();
+		jbRefresh.setIcon(refreshIcon);
+		jbRefresh.setToolTipText("Refresh");
+		//jbRefresh.setMargin(insets0);
+		jbRefresh.getAccessibleContext().setAccessibleName("Refresh");
+		jbRefresh.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				refresh();
+			}
+		});
+		
+		jbReloadPrivileges = new JButton();
+		jbReloadPrivileges.setIcon(privilegesIcon);
+		jbReloadPrivileges.setToolTipText("Reload user privileges");
+		//jbReloadPrivileges.setMargin(insets0);
+		jbReloadPrivileges.getAccessibleContext().setAccessibleName("Reload user privileges");
+		
+		jbAcercade = new JButton();
+		jbAcercade.setIcon(helpIcon);
+		jbAcercade.setToolTipText("Acerca de...");
+		//jbAcercade.setMargin(insets0);
+		jbAcercade.getAccessibleContext().setAccessibleName("Acerca de...");
+		
+		toolBar = new JToolBar();
+		toolBar.add(jbConnection);
+		toolBar.add(jbClose);
+		
+		toolBar.addSeparator();
+		toolBar.add(jbCreateDatabase);
+		toolBar.add(jbCreateTable);
+		toolBar.add(jbDropDatabase);
+		toolBar.add(jbDropTable);
+		
+		toolBar.addSeparator();
+		toolBar.add(jbRefresh);
+		toolBar.add(jbReloadPrivileges);
+		
+		toolBar.addSeparator();				
+		toolBar.add(jbAcercade);
+		
+		return toolBar;
+	}
+
+	/**
+	 * Actualiza el estado de los componentes del toolbar dependiendo de si la conexión está
+	 * abierta.
+	 */
+	public void updateToolBar(){
+		jbConnection.setEnabled(!isConnected);			
+		jbClose.setEnabled(isConnected);
+		jbCreateDatabase.setEnabled(isConnected);
+		jbCreateTable.setEnabled(isConnected);
+		jbDropDatabase.setEnabled(isConnected);
+		jbDropTable.setEnabled(isConnected);				
+		jbRefresh.setEnabled(isConnected);
+		jbReloadPrivileges.setEnabled(isConnected);
+	}
+	
+	/**
+	 * @return Devuelve el submenu Help.
+	 */
 	private JMenu getMenuHelp(){
 		jMenuHelpAboutMySqlFront = new JMenuItem();
 		jMenuHelpAboutMySqlFront.setVisible(true);
@@ -278,6 +445,9 @@ public class Principal extends JFrame {
 		return jMenuHelp;
 	}
 	
+	/**
+	 * @return Devuelve el submenu Import.
+	 */
 	private JMenu getMenuImport(){
 		jMenuImportSeparator1 = new JSeparator();
 		jMenuImportSeparator2 = new JSeparator();
@@ -351,6 +521,9 @@ public class Principal extends JFrame {
 		return jMenuImport;
 	}
 	
+	/**
+	 * @return Devuelve el submenu Tools.
+	 */
 	private JMenu getMenuTools(){
 		jMenuToolsSeparator1 = new JSeparator();
 		jMenuToolsSeparator2 = new JSeparator();
@@ -459,6 +632,9 @@ public class Principal extends JFrame {
 		return jMenuTools;
 	}
 	
+	/**
+	 * @return Devuelve el submenu Files.
+	 */
 	private JMenu getMenuFile(){
 		jMenuFileConnection = new JMenuItem();
 		jMenuFileConnection.setVisible(true);
@@ -493,6 +669,9 @@ public class Principal extends JFrame {
 		return jMenuFile;
 	}
 	
+	/**
+	 * @return Devuelve el submenu Look&Feel
+	 */
 	public JMenu crearLafMenu(){
 		// ***** create laf switcher menu 
 		//JMenuItem mi;
@@ -515,6 +694,11 @@ public class Principal extends JFrame {
 		return lafMenu;
 	}
 	
+	/**
+	 * Creo cada item del submenu Look&Feel
+	 * @param laf Lista de laf disponibles.
+	 * @return devuelve un elmento que componen el submenu Look&Feel
+	 */
 	public JRadioButtonMenuItem createLafMenuItem(LookAndFeelInfo laf)
 	{
 		JRadioButtonMenuItem mi = new JRadioButtonMenuItem(laf.getName());
@@ -640,11 +824,17 @@ public class Principal extends JFrame {
 		registroIndicesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/indices.gif"));
 	}
 	
+	/**
+	 * Cierro la ventana y por consiguiente cierra la aplicación.
+	 */
 	private void salir(){
 		setVisible(false);
 		dispose();
 	}
 	
+	/**
+	 * @return Devuelve el ResourceBundle que contiene los strings de la aplicación.
+	 */
 	public ResourceBundle getResource(){
 		return resource;
 	}
@@ -652,28 +842,38 @@ public class Principal extends JFrame {
 	/**
 	 * Procedimiento que se llama cuando se hace una nueva connection.
 	 * 
-	 * @param cconnection
+	 * @param cconnection Establece una nueva conexión abierta.
 	 */
 	public void setCConnection(CConnection cconnection){
 		this.cconnection = cconnection;
 		conectar();
 	}
 	
+	/**
+	 * Procedimiento que crea el JPanel que contiene el administrador de la base de datos.
+	 */
 	public void conectar(){
 		MdiAdmin admin = new MdiAdmin(resource, cconnection);
 		admin.setConnection(cconnection);
 		desktop.add(admin, BorderLayout.CENTER);
 		//add(admin, BorderLayout.CENTER);
 		isConnected = true;
-		updateMenuBar();
+		//updateMenuBar();
+		updateEstadoConexion();
 		refresh();
 	}
 	
+	/**
+	 * Actualiza gráficamente la aplicación.
+	 */
 	private void refresh(){
 		revalidate();
 		repaint();
 	}
 	
+	/**
+	 * Actualiza el menú principal de la aplicación dependiendo de si hay una conexión abierta.
+	 */
 	private void updateMenuBar(){
 		jMenuFileConnection.setEnabled(!isConnected);
 		jMenuFileClose.setEnabled(isConnected);
@@ -683,5 +883,6 @@ public class Principal extends JFrame {
 	
 	private void updateEstadoConexion(){
 		updateMenuBar();
+		updateToolBar();
 	}
 }

@@ -52,6 +52,11 @@ public class EstadisticasTab extends JPanel{
 	JScrollPane scroll;
 	JTable tableStatus;
 	
+	/**
+	 * Constructor del panel que contiene las estadísticas del servidor.
+	 * @param cconnection Conexión abierta.
+	 * @param resource ResourceBundle que contiene los strings de la aplicación.
+	 */
 	public EstadisticasTab(CConnection cconnection, ResourceBundle resource){
 		super();
 		this.cconnection = cconnection;
@@ -61,6 +66,9 @@ public class EstadisticasTab extends JPanel{
 		initComponents();
 	}
 	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents(){
 		
 		tableStatus= new JTable();
@@ -92,6 +100,9 @@ public class EstadisticasTab extends JPanel{
 		add(scroll);
 	}
 	
+	/**
+	 * @return Devuelve la cantidad de datos en estadísticas.
+	 */
 	public int getCantidadEstadisticas(){
 		return cantidadEstadisticas ;
 	}
