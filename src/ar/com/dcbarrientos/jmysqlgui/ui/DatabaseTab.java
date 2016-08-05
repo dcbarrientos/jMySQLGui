@@ -49,6 +49,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
+import ar.com.dcbarrientos.jmysqlgui.Funciones;
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CTabla;
 import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
@@ -134,17 +135,16 @@ public class DatabaseTab extends JPanel{
 			public void valueChanged(ListSelectionEvent e)
 			{
 				//Ignora las operaciones extra.
-        if (e.getValueIsAdjusting()) return;
+				if (e.getValueIsAdjusting()) return;
         
-        ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-        if (lsm.isSelectionEmpty()) //No selecciono fila.
-        {	filaSeleccionada = -1;
-        } 
-        else //Selecciono fila.
-        {	filaSeleccionada = lsm.getMinSelectionIndex();
-        }
-        System.out.println("fila seleccionada " + filaSeleccionada);
-        actualizarToolBar();
+				ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+				if (lsm.isSelectionEmpty()) //No selecciono fila.
+					filaSeleccionada = -1;
+				else //Selecciono fila.
+					filaSeleccionada = lsm.getMinSelectionIndex();
+        
+				//System.out.println("fila seleccionada " + filaSeleccionada);
+        		actualizarToolBar();
 			}
 		});
 	}
@@ -191,7 +191,7 @@ public class DatabaseTab extends JPanel{
 			datos[fila][2] = elemento.getRow_format();
 			datos[fila][3] = elemento.getRows();
 			datos[fila][4] = elemento.getAvg_row_length();
-			datos[fila][5] = CDatabase.getTableSize(elemento.getData_length());
+			datos[fila][5] = Funciones.getExtendedSize(elemento.getData_length());
 			datos[fila][6] = elemento.getMax_data_length();
 			datos[fila][7] = elemento.getIndex_length();
 			datos[fila][8] = elemento.getData_free();

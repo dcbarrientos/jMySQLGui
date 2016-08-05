@@ -87,6 +87,39 @@ public class CQuery {
 		return rowCount;
 	}
 	
+	public int executeUpdate(String sqlTxt){
+		rowCount = -1;
+		try{
+			st = connection.createStatement();
+			rowCount = st.executeUpdate(sqlTxt);
+		}catch(SQLException e){
+			error(e.getErrorCode(), e.getMessage());
+		}
+		
+		try {
+			st.close();
+		} catch (SQLException e) {
+		}
+		
+		return rowCount;
+	}
+	
+	public boolean execute(String sqlTxt){
+		boolean result = false;
+		try {
+			st = connection.createStatement();
+			result = st.execute(sqlTxt);
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+		}
+		try {
+			st.close();
+		} catch (SQLException e) {
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * Cierra la consulta, y el statement generados.
 	 */

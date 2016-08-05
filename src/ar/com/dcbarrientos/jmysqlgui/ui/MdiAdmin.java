@@ -43,6 +43,7 @@ import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -59,9 +60,9 @@ import javax.swing.JList;
 public class MdiAdmin extends JPanel{	
 	private static final long serialVersionUID = 1L;
 
-	private final static int DATABASE_TAB_INDEX = 1;
-	private final static int TABLE_TAB_INDEX = 2;
-	private final static int DATOS_TAB_INDEX = 3;
+	public final static int DATABASE_TAB_INDEX = 1;
+	public final static int TABLE_INFO_TAB_INDEX = 2;
+	public final static int TABLE_DATA_TAB_INDEX = 3;
 	
 	JList<String> lstSQL;
 	DefaultListModel<String> lstSQLModel;
@@ -74,7 +75,9 @@ public class MdiAdmin extends JPanel{
 	private String userName;
 	private String selectedDatabaseName;
 	private String selectedTableName;
+	DatabaseTree dbTree;
 	private DatabaseTab dbTab;
+	private TableInfoTab tableInfoTab;
 	JTabbedPane tabbedPane;
 	ImageIcon databaseIcon;
 	
@@ -134,17 +137,19 @@ public class MdiAdmin extends JPanel{
 		panelInferior.add(tabbedPane_1);
 
 		cargarInformacion();
-
 		
-		DatabaseTree dbTree = new DatabaseTree(this, userName, databases, resource);
+		dbTree = new DatabaseTree(this, userName, databases, resource);
+		
 		dbTab = new DatabaseTab(this, connection.getConnection());
+		tableInfoTab = new TableInfoTab(this, connection.getConnection(), resource);
+		
 		scrollTreeDatabase.setViewportView(dbTree);
 	}
 	
 	/**
 	 * Cargo la información de la base de datos.
 	 */
-	private void cargarInformacion(){
+	public void cargarInformacion(){
 		userName = getUser();
 		databases = new Vector<CDatabase>();
 		CQuery query = new CQuery(connection.getConnection());
@@ -163,7 +168,8 @@ public class MdiAdmin extends JPanel{
 			}
 		}
 		query.cerrar();
-			}
+
+	}
 	
 	public void setConnection(CConnection connection){
 		this.connection = connection;
@@ -195,7 +201,11 @@ public class MdiAdmin extends JPanel{
 		connection.setSelectedDatabase(databaseName);
 		
 		dbTab.setDatabase(getDatabase(databaseName));
-
+		
+		while(tabbedPane.getTabCount()>3){
+			tabbedPane.remove(TABLE_INFO_TAB_INDEX);
+		}
+		
 		if(tabbedPane.getTabCount()<3)
 			tabbedPane.insertTab(resource.getString("DatabaseTab.title") + databaseName, databaseIcon, dbTab, null, DATABASE_TAB_INDEX);
 		
@@ -209,7 +219,7 @@ public class MdiAdmin extends JPanel{
 	/**
 	 * Refresca la apariencia después que cambiaron los datos. 
 	 */
-	private void refresh(){
+	public void refresh(){
 		revalidate();
 		repaint();
 	}
@@ -240,10 +250,25 @@ public class MdiAdmin extends JPanel{
 	 * Cambia la tabla seleccionada.
 	 * @param databaseName Nombre de la base de datos en la que está la tabla seleccionada.
 	 * @param tableName Nombre de la tabla seleccionada
+	 * @param solapa a hacer visible.
 	 */
-	public void setSelectedTable(String databaseName, String tableName){
+	public void setSelectedTable(String databaseName, String tableName, int solapa){
 		this.selectedDatabaseName = databaseName;
 		this.selectedTableName = tableName;
+		connection.setSelectedDatabase(databaseName);
+		//TODO Informar a TableInfo que tabla debe mostrar.
+		//TODO Hacer la solapa que muestra los datos.
+		tableInfoTab.setSelectedTable(getDatabase(databaseName), tableName);
+		
+		if(tabbedPane.getTabCount()<3){
+			setSelectedDatabase(databaseName, false);
+		}
+		if(tabbedPane.getTabCount()<4){
+			tabbedPane.insertTab(resource.getString("TableInfoTab.title"), null, tableInfoTab, null, TABLE_INFO_TAB_INDEX);
+		}
+		tabbedPane.setTitleAt(TABLE_INFO_TAB_INDEX, resource.getString("TableInfoTab.title") + " " + tableName);
+		tabbedPane.setSelectedIndex(solapa);
+		refresh();
 	}
 	
 	/**
@@ -279,4 +304,39 @@ public class MdiAdmin extends JPanel{
 		addSQL(sql);
 	}
 	
+	/**
+	 * Actualiza la estructura que contiene la información de las bases de datos.
+	 * Es conveniente llamar este procedimiento cuando realiza una operación sobre
+	 * una base de datos (agregar, eliminar) o una tabla (agregar, eliminar, modificar).
+	 */
+	public void refreshNewDatabase(){
+		cargarInformacion();
+		dbTree.setDatabases(databases);
+		refresh();
+	}
+	
+	/**
+	 * Procedimiento para eliminar una base de datos. Verifica si hay una base de datos seleccionada
+	 * y pide confirmación para llevar a cabo la eliminación.
+	 */
+	public void dropDatabase(){
+		if(getSelectedDatabase() != null){
+			int r = JOptionPane.showConfirmDialog(null, resource.getString("DropDatabase.message") + " " + getSelectedDatabase() + "?", resource.getString("DropDatabase.title"), JOptionPane.YES_NO_OPTION);
+			if(r == JOptionPane.YES_OPTION){
+				CQuery query = new CQuery(connection.getConnection());
+				//Si elimino la base de datos vuelve con valor 0;
+				if(query.executeUpdate("DROP DATABASE `" + getSelectedDatabase() + "`") >= 0){
+					String msg = getSelectedDatabase() + " " + resource.getString("DropDatabase.success");
+					JOptionPane.showMessageDialog(null, msg, resource.getString("DropDatabase.title"), JOptionPane.INFORMATION_MESSAGE);
+					//Actualiza la estructura de datos con la base de datos y el Tree con la lista de bases de datos y tablas.
+					refreshNewDatabase();
+				}else{
+					String err = query.getErrCode() + ": " + query.getErrMsg();
+					JOptionPane.showMessageDialog(null, err, resource.getString("DropDatabase.title"), JOptionPane.ERROR_MESSAGE);										
+				}
+			}
+		}else{
+			JOptionPane.showMessageDialog(null, resource.getString("DropDatabase.error.no_selection"), resource.getString("DropDatabase.title"), JOptionPane.ERROR_MESSAGE);
+		}
+	}
 }

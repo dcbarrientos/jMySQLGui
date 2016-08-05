@@ -27,25 +27,34 @@
 package ar.com.dcbarrientos.jmysqlgui.database;
 
 import java.sql.Connection;
-import java.text.DecimalFormat;
-
-import org.mozilla.javascript.ast.ReturnStatement;
+import java.sql.SQLException;
+import java.util.Vector;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
 public class CTabla {
+	private final static int FIELD = 1;
+	private final static int TYPE = 2;
+	private final static int COLLATION = 3;
+	private final static int NULLABLE = 4;
+	private final static int DEFUALT = 5;
+	private final static int EXTRA = 6;
+	private final static int PRIVILIGIES = 7;
+	private final static int COMMENT = 8;
+
+	
 	private Connection connection = null;
 	private String name;
 	private String Tipo;
 	private String Row_format;
 	private int Rows;
 	private int Avg_row_length;
-	private int Data_length;
-	private String Max_data_length;
-	private int Index_length;
-	private int Data_free;
+	private double Data_length;
+	private double Max_data_length;
+	private double Index_length;
+	private double Data_free;
 	private int Auto_increment;
 	private String Create_time;
 	private String Update_time;
@@ -53,6 +62,8 @@ public class CTabla {
 	private String Create_options;
 	private String Comment;
 	
+	private Vector<CField> campos;
+	private int cantidadCampos;
 	
 	private String databaseName;
 	
@@ -68,6 +79,43 @@ public class CTabla {
 		this.connection = connection;
 	}
 	
+	private void cargarInformacion(){
+		String sql = "SHOW FULL COLUMNS FROM `" + databaseName + "`.`" + name + "`";
+		CQuery query = new CQuery(connection);
+		
+		campos = new Vector<CField>();
+		cantidadCampos = query.executeQuery(sql);
+		if(cantidadCampos > 0){
+			CField campo;
+			try {
+				while(query.getResultSet().next()){
+					campo = new CField();
+					campo.setField(query.getResultSet().getString(FIELD));
+					campo.setField(query.getResultSet().getString(TYPE));
+					campo.setField(query.getResultSet().getString(COLLATION));
+					campo.setField(query.getResultSet().getString(NULLABLE));
+					campo.setField(query.getResultSet().getString(DEFUALT));
+					campo.setField(query.getResultSet().getString(EXTRA));
+					campo.setField(query.getResultSet().getString(PRIVILIGIES));
+					campo.setField(query.getResultSet().getString(COMMENT));
+					campos.addElement(campo);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public Vector<CField> getCampos(){
+		if(campos == null)
+			cargarInformacion();
+		return campos;
+	}
+	
+	public String getDatabaseName(){
+		return databaseName;
+	}
 	
 	/**
 	 * @return Devuelve el nombre de la tabla
@@ -144,7 +192,7 @@ public class CTabla {
 	/**
 	 * @return the data_length
 	 */
-	public int getData_length() {
+	public double getData_length() {
 		return Data_length;
 	}
 
@@ -152,7 +200,7 @@ public class CTabla {
 	/**
 	 * @param data_length the data_length to set
 	 */
-	public void setData_length(int data_length) {
+	public void setData_length(double data_length) {
 		Data_length = data_length;
 	}
 
@@ -160,7 +208,7 @@ public class CTabla {
 	/**
 	 * @return the max_data_length
 	 */
-	public String getMax_data_length() {
+	public double getMax_data_length() {
 		return Max_data_length;
 	}
 
@@ -168,7 +216,7 @@ public class CTabla {
 	/**
 	 * @param max_data_length the max_data_length to set
 	 */
-	public void setMax_data_length(String max_data_length) {
+	public void setMax_data_length(double max_data_length) {
 		Max_data_length = max_data_length;
 	}
 
@@ -176,7 +224,7 @@ public class CTabla {
 	/**
 	 * @return the index_length
 	 */
-	public int getIndex_length() {
+	public double getIndex_length() {
 		return Index_length;
 	}
 
@@ -184,7 +232,7 @@ public class CTabla {
 	/**
 	 * @param index_length the index_length to set
 	 */
-	public void setIndex_length(int index_length) {
+	public void setIndex_length(double index_length) {
 		Index_length = index_length;
 	}
 
@@ -192,7 +240,7 @@ public class CTabla {
 	/**
 	 * @return the data_free
 	 */
-	public int getData_free() {
+	public double getData_free() {
 		return Data_free;
 	}
 
@@ -200,7 +248,7 @@ public class CTabla {
 	/**
 	 * @param data_free the data_free to set
 	 */
-	public void setData_free(int data_free) {
+	public void setData_free(double data_free) {
 		Data_free = data_free;
 	}
 

@@ -44,6 +44,9 @@ public class CConnection {
 	private String pass;
 	private int port;
 	private String database;
+	private boolean isConnected;
+	private String version;
+	private String baseDir;
 	
 	public static final String HOST = "localhost";
 	public static final String USER = "root";
@@ -58,13 +61,14 @@ public class CConnection {
 	//Interffaz de errores.
 	private int errCode;
 	private String errMsg;
-	private boolean isConnected;
 	
 	/**
 	 * Constructor de CConnection
 	 */
 	public CConnection(){
 		isConnected = false;
+		baseDir = "";
+		version = "";
 	}
 	
 	/**
@@ -187,21 +191,43 @@ public class CConnection {
 	 * @return Devuelve la version de MySQL Server.
 	 */
 	public String getVersion(){
-		String sql = "SELECT version()";
-		String version = "";
-		query = new CQuery(connection);
-		
-		if(query.executeQuery(sql)>0){
-			try {
-				query.getResultSet().next();
-				version = query.getResultSet().getString(1);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if(version.length() == 0){
+			String sql = "SELECT version()";
+			query = new CQuery(connection);
+			
+			if(query.executeQuery(sql)>0){
+				try {
+					query.getResultSet().next();
+					version = query.getResultSet().getString(1);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		return version;
 	}
 	
+	public String getBaseDir(){
+		if(baseDir.length() == 0){
+			String sql = "SHOW variables WHERE Variable_name = \"basedir\"";
+			query = new CQuery(connection);
+			if(query.executeQuery(sql) > 0){
+				try {
+					query.getResultSet().next();
+					baseDir = query.getResultSet().getString("Value");
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return baseDir;
+	}
+	
+	public String getPassword(){
+		return pass;
+	}
 }

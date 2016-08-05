@@ -137,14 +137,18 @@ public class DatabaseTree extends JTree{
 			//Genero el nodo con el nombre de la base de datos.
 			dbNode = new DefaultMutableTreeNode(db.getName());
 			treeModel.insertNodeInto(dbNode, dbs, dbs.getChildCount());
-			
-			//Genero los nodos con las tablas correspondientes a la base de datos de arriba.
-			HashMap<String, CTabla> tablas = db.getTablas();
-			SortedSet<String> keys = new TreeSet<String>(tablas.keySet());
-			for(String key : keys){
-				tbNode = new DefaultMutableTreeNode(key);
+			if(db.getTableCount() == 0){
+				tbNode = new DefaultMutableTreeNode(resource.getString("DatabaseTree.nodeEmpty"));
 				treeModel.insertNodeInto(tbNode, dbNode, dbNode.getChildCount());
-			}			 
+			}else{
+				//Genero los nodos con las tablas correspondientes a la base de datos de arriba.
+				HashMap<String, CTabla> tablas = db.getTablas();
+				SortedSet<String> keys = new TreeSet<String>(tablas.keySet());
+				for(String key : keys){
+					tbNode = new DefaultMutableTreeNode(key);
+					treeModel.insertNodeInto(tbNode, dbNode, dbNode.getChildCount());
+				}
+			}
 		}
 	}
 	
@@ -162,6 +166,11 @@ public class DatabaseTree extends JTree{
 	 */
 	public void setDatabases(Vector<CDatabase> databases){
 		this.databases = databases;
+		vaciar();
+		cargarDatos();
+		this.setModel(treeModel);
+		revalidate();
+		refresh();
 	}
 	
 	/**
@@ -176,7 +185,7 @@ public class DatabaseTree extends JTree{
 			if(isDatabase(treePath))
 				admin.setSelectedDatabase(treePath.getPathComponent(DATABASE_INDEX).toString(), true);
 			else if(isTable(treePath))
-				admin.setSelectedTable(treePath.getPathComponent(DATABASE_INDEX).toString(), treePath.getPathComponent(TABLE_INDEX).toString());
+				admin.setSelectedTable(treePath.getPathComponent(DATABASE_INDEX).toString(), treePath.getPathComponent(TABLE_INDEX).toString(), MdiAdmin.TABLE_INFO_TAB_INDEX);
 		}
 	}
 	
@@ -222,7 +231,9 @@ public class DatabaseTree extends JTree{
 	public void refresh(){
 		vaciar();
 		cargarDatos();
-		expandRow(DATABASE_INDEX);
+		expandRow(1);
+
+		revalidate();		
 		repaint();
 	}
 	

@@ -48,11 +48,6 @@ public class CDatabase {
 	
 	private HashMap<String, CTabla> tablas;
 	
-	public static final int BYTES = 0;
-	public static final int KB = 1;
-	public static final int MB = 2;
-	public static final int GB = 3;
-	
 	
 	/**
 	 * Constructar del controlador que se encarga de cargar la información de la base de datos inigresada.
@@ -87,10 +82,10 @@ public class CDatabase {
 					tabla.setRow_format(result.getString(4));
 					tabla.setRows(result.getInt(5));
 					tabla.setAvg_row_length(result.getInt(6));
-					tabla.setData_length(result.getInt(7));
-					tabla.setMax_data_length(result.getString(8));
-					tabla.setIndex_length(result.getInt(9));
-					tabla.setData_free(result.getInt(10));
+					tabla.setData_length(result.getDouble(7));
+					tabla.setMax_data_length(result.getDouble(8));
+					tabla.setIndex_length(result.getDouble(9));
+					tabla.setData_free(result.getDouble(10));
 					tabla.setAuto_increment(result.getInt(11));
 					tabla.setCreate_time(result.getString(12));
 					tabla.setUpdate_time(result.getString(13));
@@ -145,30 +140,12 @@ public class CDatabase {
 	}
 	
 	/**
-	 * Cuando se le ingresa un valor en bytes devuelve su equivalente en la unidad más
-	 * grande posible. 1024 bytes devolvería 1 kb.
-	 * @param nro Valor en bytes para calcular su equivalente.
-	 * @return Devuelve el equibalente más grande posible.
+	 * Devuelve un Ctable con la información de una tabla.
+	 * @param tableName Nombre de la tabla solicitada.
+	 * @return Devuelve el objeto con la información de la tabla.
 	 */
-	public static String getTableSize(int nro){
-		float size = nro;
-		int cons = 1024;
-		int unidad = 0;
-		
-		while(size > cons){
-			size /= cons;
-			unidad++;
-		}
-
-		DecimalFormat dec = new DecimalFormat("0.00");
-		if(unidad == BYTES)
-			return dec.format(size).concat(" B.");
-		else if(unidad == KB)
-			return dec.format(size).concat(" Kb.");
-		else if(unidad == MB)
-			return dec.format(size).concat(" Mb.");
-	
-		return dec.format(size).concat(" Gb.");
+	public CTabla getTabla(String tableName){
+		return tablas.get(tableName);
 	}
-
+	
 }

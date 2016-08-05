@@ -30,6 +30,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 import javax.swing.ButtonGroup;
@@ -59,6 +62,8 @@ public class Principal extends JFrame {
 	private ResourceBundle resource;
 	private CConnection cconnection;
 	private boolean isConnected;
+	
+	private MdiAdmin admin;
 	
 	//JDesktopPane desktop;
 	JPanel desktop;
@@ -91,6 +96,7 @@ public class Principal extends JFrame {
 	private JMenuItem jMenuToolsFlushTables;
 	private JMenuItem jMenuToolsFlushTablesReadLock;
 	private JMenuItem jMenuToolsFlushStatus;
+	private JMenuItem jMenuToolsCommandLine;
 	
 	private JMenu jMenuImport;
 	private JMenuItem jMenuImportTextFile;
@@ -229,7 +235,7 @@ public class Principal extends JFrame {
 		jMenuOpciones.setVisible(true);
 		jMenuOpciones.setText("Opciones");
 
-		jMenuOpciones.add(crearLafMenu());
+		//jMenuOpciones.add(crearLafMenu());
 		
 //		themesMenu = crearThemeMenu();/		
 //		jMenuOpciones.add(themesMenu);
@@ -339,7 +345,7 @@ public class Principal extends JFrame {
 		jbCreateDatabase.getAccessibleContext().setAccessibleName("Create a new database");
 		jbCreateDatabase.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				//nuevaDatabase();
+				crearDatabase();
 			}
 		});
 		
@@ -359,9 +365,9 @@ public class Principal extends JFrame {
 		jbDropDatabase.setToolTipText("Drop Database...");
 		//jbDropDatabase.setMargin(insets0);
 		jbDropDatabase.getAccessibleContext().setAccessibleName("Drop database.");
-		jbDropDatabase.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				//borrarDatabase();
+		jbDropDatabase.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				admin.dropDatabase();
 			}
 		});
 		
@@ -544,6 +550,12 @@ public class Principal extends JFrame {
 		jMenuToolsCreateDatabase.setText("Create Database...");
 		jMenuToolsCreateDatabase.setToolTipText("Create a new database");
 		jMenuToolsCreateDatabase.setIcon(createDatabaseIcon);
+		jMenuToolsCreateDatabase.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				jMenuToolsCreateDatabaseAction(e);
+			}
+		});
 		
 		jMenuToolsCreateTable = new JMenuItem();
 		jMenuToolsCreateTable.setVisible(true);
@@ -556,6 +568,12 @@ public class Principal extends JFrame {
 		jMenuToolsDropDatabase.setText("Drop Database...");
 		jMenuToolsDropDatabase.setToolTipText("Drop database.");
 		jMenuToolsDropDatabase.setIcon(dropDatabaseIcon);
+		jMenuToolsDropDatabase.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				admin.dropDatabase();
+			}
+		});
 		
 		jMenuToolsDropTable = new JMenuItem();
 		jMenuToolsDropTable.setVisible(true);
@@ -616,6 +634,17 @@ public class Principal extends JFrame {
 		jMenuToolsTableDiagnostic.setText("Table Diagnostic");
 		jMenuToolsTableDiagnostic.setToolTipText("Optimize, repair and analyse tables.");
 		jMenuToolsTableDiagnostic.setIcon(tableDiagnosticIcon);
+		
+		jMenuToolsCommandLine = new JMenuItem();
+		jMenuToolsCommandLine.setVisible(true);
+		jMenuToolsCommandLine.setText("MySQL Command Line client");
+		jMenuToolsCommandLine.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				jMenuToolsCommandLineMouseClicked(e);
+				
+			}
+		});
 
 		jMenuTools.add(jMenuToolsRefresh);
 		jMenuTools.add(jMenuToolsSeparator1);
@@ -628,6 +657,8 @@ public class Principal extends JFrame {
 		jMenuTools.add(jMenuToolsSeparator3);
 		jMenuTools.add(jMenuToolsUserManager);
 		jMenuTools.add(jMenuToolsTableDiagnostic);
+		jMenuTools.add(new JSeparator());
+		jMenuTools.add(jMenuToolsCommandLine);
 		
 		return jMenuTools;
 	}
@@ -853,7 +884,7 @@ public class Principal extends JFrame {
 	 * Procedimiento que crea el JPanel que contiene el administrador de la base de datos.
 	 */
 	public void conectar(){
-		MdiAdmin admin = new MdiAdmin(resource, cconnection);
+		admin = new MdiAdmin(resource, cconnection);
 		admin.setConnection(cconnection);
 		desktop.add(admin, BorderLayout.CENTER);
 		//add(admin, BorderLayout.CENTER);
@@ -884,5 +915,31 @@ public class Principal extends JFrame {
 	private void updateEstadoConexion(){
 		updateMenuBar();
 		updateToolBar();
+	}
+
+	/**
+	 * Click en el Menuitem Mysql command line client.
+	 * @param e Descripción del evento.
+	 */
+	private void jMenuToolsCommandLineMouseClicked(ActionEvent e){
+		try {
+			String cmd = "cmd.exe /c start " + cconnection.getBaseDir() + "/bin/mysql --user=" + cconnection.getUserName() + " --password=" + cconnection.getPassword();
+			Runtime.getRuntime().exec(cmd);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+
+	private void jMenuToolsCreateDatabaseAction(ActionEvent e){
+		crearDatabase();
+	}
+	
+	private void crearDatabase(){
+		CrearDatabase cd = new CrearDatabase(this, cconnection.getConnection(), resource);
+		if(cd.showDialog()){
+			admin.refreshNewDatabase();
+		}
+		
 	}
 }
