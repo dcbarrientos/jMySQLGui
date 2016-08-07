@@ -367,7 +367,6 @@ public class Principal extends JFrame {
 		jbDropDatabase.getAccessibleContext().setAccessibleName("Drop database.");
 		jbDropDatabase.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
-				admin.dropDatabase();
 			}
 		});
 		
@@ -376,6 +375,11 @@ public class Principal extends JFrame {
 		jbDropTable.setToolTipText("Drop Table...");
 		//jbDropTable.setMargin(insets0);
 		jbDropTable.getAccessibleContext().setAccessibleName("Drop table.");
+		jbDropTable.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				admin.dropTable();
+			}
+		});
 		
 		jbRefresh = new JButton();
 		jbRefresh.setIcon(refreshIcon);
@@ -580,6 +584,12 @@ public class Principal extends JFrame {
 		jMenuToolsDropTable.setText("Drop Table...");
 		jMenuToolsDropTable.setToolTipText("Drop table.");
 		jMenuToolsDropTable.setIcon(dropTableIcon);
+		jMenuToolsDropTable.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				admin.dropTable();
+			}
+		});
 		
 		jMenuToolsFlushHosts = new JMenuItem();
 		jMenuToolsFlushHosts.setVisible(true);

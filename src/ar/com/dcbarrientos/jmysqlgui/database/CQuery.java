@@ -26,11 +26,13 @@
 
 package ar.com.dcbarrientos.jmysqlgui.database;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Vector;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -153,6 +155,18 @@ public class CQuery {
 		}		
 		
 		return datos;		
+	}
+	
+	public Vector<String> getStringSet(int c){
+		Vector<String> vDatos = new Vector<String>();
+		try {
+			while(result.next()){
+				vDatos.addElement(result.getString(c));
+			}
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+		}		
+		return vDatos;
 	}
 	
 	/**

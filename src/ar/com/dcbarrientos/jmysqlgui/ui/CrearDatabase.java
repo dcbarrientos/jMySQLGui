@@ -26,25 +26,25 @@
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
+import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
-
-import java.awt.Dimension;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -63,6 +63,12 @@ public class CrearDatabase extends JDialog{
 	private Connection connection;
 	private ResourceBundle resource;
 	private boolean success;
+	private JLabel lblDefault;
+	private JComboBox<String> cbCollations;
+	private JLabel lblDefaultCollation;
+	private JLabel lblCollation;
+	
+	private String defaultCollation;
 	
 	public CrearDatabase(Principal principal, Connection connection, ResourceBundle resource) {
 		super(principal, true);
@@ -71,17 +77,18 @@ public class CrearDatabase extends JDialog{
 		this.resource = resource;
 		success = false;
 		
+		this.defaultCollation = getDefaultCollation();
 		initComponents();
 	}
 	private void initComponents() {
-		setMinimumSize(new Dimension(347, 169));
+		setMinimumSize(new Dimension(347, 218));
 		
 		panel = new JPanel();
-		panel.setBounds(10, 11, 308, 73);
+		panel.setBounds(10, 11, 308, 121);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		
 		btnOk = new JButton(resource.getString("CrearDatabase.btnOk"));
-		btnOk.setBounds(130, 95, 89, 23);
+		btnOk.setBounds(130, 143, 89, 23);
 		btnOk.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
 				btnOkMouseClicked(e);
@@ -89,7 +96,7 @@ public class CrearDatabase extends JDialog{
 		});
 		
 		btnCancel = new JButton(resource.getString("CrearDatabase.btnCancel"));
-		btnCancel.setBounds(229, 95, 89, 23);
+		btnCancel.setBounds(229, 143, 89, 23);
 		btnCancel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
 				btnCancelMouseClicked(e);
@@ -108,6 +115,25 @@ public class CrearDatabase extends JDialog{
 		panel.setLayout(null);
 		panel.add(txtDatabaseName);
 		panel.add(lblDatabaseName);
+		
+		lblDefault = new JLabel(resource.getString("CrearDatabase.lblDefault"));
+		lblDefault.setBounds(12, 93, 58, 14);
+		panel.add(lblDefault);
+		
+		cbCollations = new JComboBox<String>();
+		cbCollations.setBounds(80, 61, 216, 20);
+		DefaultComboBoxModel<String>comboModel = new DefaultComboBoxModel<String>(getCollations()); 
+		cbCollations.setModel(comboModel);
+		cbCollations.setSelectedItem(defaultCollation);
+		panel.add(cbCollations);
+		
+		lblDefaultCollation = new JLabel(defaultCollation);
+		lblDefaultCollation.setBounds(80, 93, 216, 14);
+		panel.add(lblDefaultCollation);
+		
+		lblCollation = new JLabel(resource.getString("CrearDatabase.lblCollation"));
+		lblCollation.setBounds(12, 64, 58, 14);
+		panel.add(lblCollation);
 		getContentPane().add(btnOk);
 		getContentPane().add(btnCancel);
 		
@@ -124,7 +150,8 @@ public class CrearDatabase extends JDialog{
 	 * @return Verdadero si se pudo crear la base de datos.
 	 */
 	private boolean crearDatabase(String nombre){
-		String sqlTxt = "CREATE DATABASE `" + nombre + "`";
+		//CREATE DATABASE `Diego` /*!40100 COLLATE 'latin1_swedish_ci' */
+		String sqlTxt = "CREATE DATABASE `" + nombre + "` /*!40100 COLLATE '" + cbCollations.getItemAt(cbCollations.getSelectedIndex()) + "' */";
 		CQuery query = new CQuery(connection);
 		if(query.executeUpdate(sqlTxt) > 0)
 			return true;
@@ -155,4 +182,31 @@ public class CrearDatabase extends JDialog{
 		return success;
 	}
 	
+	private String getDefaultCollation(){
+		String defaultCollation = null;
+		String sqlTxt = "SHOW VARIABLES LIKE 'collation_server';";
+		CQuery query = new CQuery(connection);
+		if(query.executeQuery(sqlTxt) >= 0){
+			try {
+				query.getResultSet().next();
+				defaultCollation = query.getResultSet().getString("Value");
+			} catch (SQLException e) {
+				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("CrearDatabase.errorTitle"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		query.cerrar();
+		
+		return defaultCollation;
+	}
+	
+	private Vector<String> getCollations(){
+		CQuery query = new CQuery(connection);
+		String sqlTxt = "SELECT * FROM `information_schema`.`COLLATIONS`";
+
+		if(query.executeQuery(sqlTxt) > 0){
+			return query.getStringSet(1);
+		}		
+		query.cerrar();
+		return null;
+	}
 }

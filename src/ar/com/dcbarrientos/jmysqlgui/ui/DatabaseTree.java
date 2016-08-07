@@ -26,8 +26,8 @@
 
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
@@ -36,6 +36,8 @@ import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -57,6 +59,8 @@ public class DatabaseTree extends JTree{
 	private MdiAdmin admin;
 	private ResourceBundle resource;
 	private TreePath treePath;
+	private boolean nodoEncontrado;					//Uso esta variable como bandera para buscar un nodo.
+	private boolean procesarEvento;
 	
 	private DefaultTreeModel treeModel;
 	private DefaultMutableTreeNode id;
@@ -64,6 +68,7 @@ public class DatabaseTree extends JTree{
 	private DefaultMutableTreeNode users;
 	private DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
 	
+	public static final int ROOT_INDEX = 0;
 	public static final int USER_INDEX = 1;
 	public static final int DATABASE_INDEX = 2;
 	public static final int TABLE_INDEX = 3;
@@ -88,16 +93,18 @@ public class DatabaseTree extends JTree{
 	 */
 	public DatabaseTree(MdiAdmin admin, String user, Vector<CDatabase> databases, ResourceBundle resource){
 		super();
+		/*
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				databaseTreeMouseClicked(e);
 			}
-		});
+		});*/
 		this.admin = admin;
 		this.user = user;
 		this.databases = databases;
 		this.resource = resource;
+		procesarEvento = true;
 		
 		initComponents();
 	}
@@ -124,6 +131,12 @@ public class DatabaseTree extends JTree{
 		
 		this.setCellRenderer(renderer);
 		this.setModel(treeModel);
+		this.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				databaseTreeValueChanged(e);
+			}
+		});
 	}
 	
 	/**
@@ -165,12 +178,15 @@ public class DatabaseTree extends JTree{
 	 * @param databases Bases de datos del servidor.
 	 */
 	public void setDatabases(Vector<CDatabase> databases){
+		procesarEvento = false;
 		this.databases = databases;
 		vaciar();
 		cargarDatos();
 		this.setModel(treeModel);
+		
 		revalidate();
 		refresh();
+		procesarEvento = true;
 	}
 	
 	/**
@@ -182,6 +198,17 @@ public class DatabaseTree extends JTree{
 		int selRow = getRowForLocation(e.getX(), e.getY());
 		if(selRow > 0){
 			treePath = getPathForLocation(e.getX(), e.getY());
+			if(isDatabase(treePath))
+				admin.setSelectedDatabase(treePath.getPathComponent(DATABASE_INDEX).toString(), true);
+			else if(isTable(treePath))
+				admin.setSelectedTable(treePath.getPathComponent(DATABASE_INDEX).toString(), treePath.getPathComponent(TABLE_INDEX).toString(), MdiAdmin.TABLE_INFO_TAB_INDEX);
+		}
+	}
+	
+	public void databaseTreeValueChanged(TreeSelectionEvent e){
+		if(procesarEvento){
+			treePath = e.getPath();
+			
 			if(isDatabase(treePath))
 				admin.setSelectedDatabase(treePath.getPathComponent(DATABASE_INDEX).toString(), true);
 			else if(isTable(treePath))
@@ -236,5 +263,91 @@ public class DatabaseTree extends JTree{
 		revalidate();		
 		repaint();
 	}
+		
+	public void selectRoot(){
+		setSelectionRow(0);
+	}
+	
+	/**
+	 * Selecciona un nodo a partir de su nombre
+	 * @param nombre Nombre del nodo a seleccionar.
+	 */
+	public void seleccionarPorNombre(String nombre){
+		nodoEncontrado = false;
+		int row = indexByNode(id, nombre);
+		if(nodoEncontrado){
+			expandRow(row);
+			setSelectionRow(row);
+		}else
+			setSelectionRow(ROOT_INDEX);
+	}
+
+	
+	/**
+	 * Busca el nodo que contiene el texto nombre. Debo poner encontrado en false
+	 * antes del primer llamado.
+	 * @param node Nodo a partir de dónde se inicia la búsqueda.
+	 * @param nombre Nombre del nodo a buscar.
+	 * @return Devuelve el índice del nodo a buscar.
+	 */
+	private int indexByNode(DefaultMutableTreeNode node, String nombre){
+		DefaultMutableTreeNode elemento;
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> e = node.breadthFirstEnumeration();
+		
+		int i = 1;
+		e.nextElement();		
+		while(e.hasMoreElements() && !nodoEncontrado){
+			elemento = (DefaultMutableTreeNode)e.nextElement();
+			if(nombre.equals(elemento.getUserObject().toString())){
+				nodoEncontrado = true;
+				return i;
+			}else if(!elemento.isLeaf()){
+				i += indexByNode(elemento, nombre);
+			}else
+				i++;
+		}
+		
+		return i;
+	}
+
+	/**
+	 * Selecciono en el tree la base de datos especificada en nombre.
+	 * @param nombre Nombre de la base de datos a seleccionar.
+	 */
+	public void selectDatabaseByName(String nombre){
+		//Cierro todos los nodos.
+		collapseRow(ROOT_INDEX);
+		@SuppressWarnings("unchecked")
+		Enumeration<DefaultMutableTreeNode> e = dbs.breadthFirstEnumeration();
+		DefaultMutableTreeNode elemento;
+		
+		int i = 2;
+		if(e.hasMoreElements()){
+			//El primer elemento es el nodo que contiene las bases de datos, no lo tomo en cuenta.
+			e.nextElement();
+			while(e.hasMoreElements()){
+				//elemento contendrá cada base de datos.
+				elemento = (DefaultMutableTreeNode)e.nextElement();
+				if(nombre.equals(elemento.getUserObject().toString())){
+					//Espando hasta el nodo base de datos incluído, todas las bases de datos
+					//quedan a la vista.
+					this.expandPath(new TreePath(dbs.getPath()));
+					
+					//Selecciono la base de datos por su indice.
+					setSelectionRow(i);
+					//Expando el node de la base de datos elegida.
+					this.expandPath(getSelectionPath());
+					
+					revalidate();
+					repaint();
+					
+					return;
+				}
+				i++;
+			}
+		}
+	} 
+
 	
 }

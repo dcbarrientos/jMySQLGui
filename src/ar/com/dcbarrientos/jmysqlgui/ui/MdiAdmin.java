@@ -330,6 +330,7 @@ public class MdiAdmin extends JPanel{
 					JOptionPane.showMessageDialog(null, msg, resource.getString("DropDatabase.title"), JOptionPane.INFORMATION_MESSAGE);
 					//Actualiza la estructura de datos con la base de datos y el Tree con la lista de bases de datos y tablas.
 					refreshNewDatabase();
+					selectedDatabaseName = null;
 				}else{
 					String err = query.getErrCode() + ": " + query.getErrMsg();
 					JOptionPane.showMessageDialog(null, err, resource.getString("DropDatabase.title"), JOptionPane.ERROR_MESSAGE);										
@@ -337,6 +338,37 @@ public class MdiAdmin extends JPanel{
 			}
 		}else{
 			JOptionPane.showMessageDialog(null, resource.getString("DropDatabase.error.no_selection"), resource.getString("DropDatabase.title"), JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	/**
+	 * Procedimiento para eliminar una tabla de una base de datos. Verifica si hay una tabla seleccionada
+	 * y pide cofrmación para llevar a cabo la eliminación.
+	 */
+	public void dropTable(){
+		if(getSelectedTable() != null){
+			int r = JOptionPane.showConfirmDialog(null, resource.getString("DropTable.message") + " " + getSelectedTable() + "?", resource.getString("DropTable.title"), JOptionPane.YES_NO_OPTION);
+			if(r == JOptionPane.YES_OPTION){
+				CQuery query = new CQuery(connection.getConnection());
+				if(query.executeUpdate("DROP TABLE `" + getSelectedDatabase() + "`.`" + getSelectedTable() + "`") >= 0){
+					String msg = getSelectedTable() + " " + resource.getString("DropTable.success");
+					JOptionPane.showMessageDialog(null, msg, resource.getString("DropTable.title"), JOptionPane.INFORMATION_MESSAGE);
+					selectedTableName = null;
+					refreshNewDatabase();
+					dbTree.selectDatabaseByName(selectedDatabaseName);
+				}else{
+					String err = query.getErrCode() + ": " + query.getErrMsg();
+					JOptionPane.showMessageDialog(null, err, resource.getString("DropTable.title"), JOptionPane.ERROR_MESSAGE);
+				}
+				try {
+					System.out.println("Base de datos:" + connection.getConnection().getCatalog());
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}else{
+			JOptionPane.showMessageDialog(null, resource.getString("DropTable.error.no_selection"), resource.getString("DropTable.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }
