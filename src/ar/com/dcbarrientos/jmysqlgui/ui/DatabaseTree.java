@@ -113,6 +113,7 @@ public class DatabaseTree extends JTree{
 	 * Inicilizo la interfaz gráfica.
 	 */
 	private void initComponents(){
+		setExpandsSelectedPaths(true);
 		id = new DefaultMutableTreeNode(user);
 		treeModel = new DefaultTreeModel(id);
 		dbs = new DefaultMutableTreeNode(resource.getString("DatabaseTree.nodeDatabases"));
@@ -145,7 +146,7 @@ public class DatabaseTree extends JTree{
 	private void cargarDatos(){
 		DefaultMutableTreeNode dbNode;
 		DefaultMutableTreeNode tbNode;
-		
+
 		for(CDatabase db : databases){
 			//Genero el nodo con el nombre de la base de datos.
 			dbNode = new DefaultMutableTreeNode(db.getName());
@@ -185,7 +186,7 @@ public class DatabaseTree extends JTree{
 		this.setModel(treeModel);
 		
 		revalidate();
-		refresh();
+		//refresh();
 		procesarEvento = true;
 	}
 	
@@ -208,7 +209,7 @@ public class DatabaseTree extends JTree{
 	public void databaseTreeValueChanged(TreeSelectionEvent e){
 		if(procesarEvento){
 			treePath = e.getPath();
-			
+
 			if(isDatabase(treePath))
 				admin.setSelectedDatabase(treePath.getPathComponent(DATABASE_INDEX).toString(), true);
 			else if(isTable(treePath))
@@ -315,6 +316,7 @@ public class DatabaseTree extends JTree{
 	 * Selecciono en el tree la base de datos especificada en nombre.
 	 * @param nombre Nombre de la base de datos a seleccionar.
 	 */
+	/*
 	public void selectDatabaseByName(String nombre){
 		//Cierro todos los nodos.
 		collapseRow(ROOT_INDEX);
@@ -348,6 +350,51 @@ public class DatabaseTree extends JTree{
 			}
 		}
 	} 
-
+*/
+	/**
+	 * @return Devuelve el TreePath del nodo seleccionado.
+	 */
+	public TreePath getSelectedDBNodePath(){
+		return this.getSelectionPath();
+	}
 	
+	/**
+	 * @return Devuelve el Parent del nodo seleccionado.
+	 */
+	public TreePath getSelectedParentDBNodePath(){
+		return (this.getSelectionPath().getParentPath());
+	}
+	
+	/**
+	 * Selecciona un nodo especificado por un TreePath
+	 * @param path TreePath del nodo a seleccionar.
+	 */
+	public void selectDatabaseByName(String nombre){
+		boolean encontrado = false;
+		int i = 0;
+		TreePath miPath = null;
+		
+		while(!encontrado && i < dbs.getChildCount()){
+			if(dbs.getChildAt(i).toString().equals(nombre)){
+				miPath = new TreePath(dbs.getPath()).pathByAddingChild(dbs.getChildAt(i));
+				encontrado = true;
+			}
+			i++;
+		}
+		
+		if(encontrado){
+			this.expandPath(miPath);
+			this.setSelectionPath(miPath);
+		}
+	}
+	
+	/**
+	 * Expande el node de Bases de datos.
+	 */
+	public void expandDatabases(){
+		TreePath p = new TreePath(dbs.getPath());
+
+		this.expandPath(p);
+		this.setSelectionPath(p);
+	}
 }

@@ -34,25 +34,18 @@ import java.util.Vector;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.tree.TreePath;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
 
-/**
- * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
- *
- */
-/**
- * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
- *
- */
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
@@ -371,4 +364,5 @@ public class MdiAdmin extends JPanel{
 			JOptionPane.showMessageDialog(null, resource.getString("DropTable.error.no_selection"), resource.getString("DropTable.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
+	
 }

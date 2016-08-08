@@ -30,9 +30,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ResourceBundle;
-import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -44,7 +42,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 
-import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
+import ar.com.dcbarrientos.jmysqlgui.database.CMySQL;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -69,7 +67,14 @@ public class CrearDatabase extends JDialog{
 	private JLabel lblCollation;
 	
 	private String defaultCollation;
+	private CMySQL cMySQL;
 	
+	/**
+	 * Crea una instancia de CrearDatabase, el cual permite crear una base de datos nueva.
+	 * @param principal Frame principal de la aplicación.
+	 * @param connection Conexión abierta.
+	 * @param resource ResourceBundel en el cual se encuentran los strings de la aplicación.
+	 */
 	public CrearDatabase(Principal principal, Connection connection, ResourceBundle resource) {
 		super(principal, true);
 		this.principal = principal;
@@ -77,9 +82,14 @@ public class CrearDatabase extends JDialog{
 		this.resource = resource;
 		success = false;
 		
-		this.defaultCollation = getDefaultCollation();
+		cMySQL = new CMySQL(this.connection);
+		this.defaultCollation = cMySQL.getDefaultCollation();
 		initComponents();
 	}
+	
+	/**
+	 * Inicializo la interfaz gráfica.
+	 */
 	private void initComponents() {
 		setMinimumSize(new Dimension(347, 218));
 		
@@ -122,7 +132,7 @@ public class CrearDatabase extends JDialog{
 		
 		cbCollations = new JComboBox<String>();
 		cbCollations.setBounds(80, 61, 216, 20);
-		DefaultComboBoxModel<String>comboModel = new DefaultComboBoxModel<String>(getCollations()); 
+		DefaultComboBoxModel<String>comboModel = new DefaultComboBoxModel<String>(cMySQL.getCollations()); 
 		cbCollations.setModel(comboModel);
 		cbCollations.setSelectedItem(defaultCollation);
 		panel.add(cbCollations);
@@ -150,18 +160,19 @@ public class CrearDatabase extends JDialog{
 	 * @return Verdadero si se pudo crear la base de datos.
 	 */
 	private boolean crearDatabase(String nombre){
-		//CREATE DATABASE `Diego` /*!40100 COLLATE 'latin1_swedish_ci' */
-		String sqlTxt = "CREATE DATABASE `" + nombre + "` /*!40100 COLLATE '" + cbCollations.getItemAt(cbCollations.getSelectedIndex()) + "' */";
-		CQuery query = new CQuery(connection);
-		if(query.executeUpdate(sqlTxt) > 0)
-			return true;
-		
-		JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("CrearDatabase.errorTitle"), JOptionPane.ERROR_MESSAGE);
-		
-		return false;
+		if(!cMySQL.crearDatabase(nombre, cbCollations.getItemAt(cbCollations.getSelectedIndex()))){
+			JOptionPane.showMessageDialog(null, cMySQL.getErrCode() + ": " + cMySQL.getErrMsg(), resource.getString("CrearDatabase.errorTitle"), JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+
+		return true;
 	}
 	
 	
+	/**
+	 * Código que se dispara cuando se presiona el botón btnOk.
+	 * @param e Evento del mouse generado.
+	 */
 	private void btnOkMouseClicked(MouseEvent e){
 		if(txtDatabaseName.getText().length() > 0){
 			success = crearDatabase(txtDatabaseName.getText());
@@ -172,41 +183,21 @@ public class CrearDatabase extends JDialog{
 		}		
 	}
 	
+	/**
+	 * Código que se dispara cuando se presiona el botón btnCancel.
+	 * @param e Evento del mouse generado.
+	 */
 	private void btnCancelMouseClicked(MouseEvent e){
 		setVisible(false);
 		dispose();
 	}
 	
+	/**
+	 * Muestra el diálogo CrearDatabase modal.
+	 * @return Verdadero si la base de datos se generó con éxito.
+	 */
 	public boolean showDialog(){
 		setVisible(true);
 		return success;
-	}
-	
-	private String getDefaultCollation(){
-		String defaultCollation = null;
-		String sqlTxt = "SHOW VARIABLES LIKE 'collation_server';";
-		CQuery query = new CQuery(connection);
-		if(query.executeQuery(sqlTxt) >= 0){
-			try {
-				query.getResultSet().next();
-				defaultCollation = query.getResultSet().getString("Value");
-			} catch (SQLException e) {
-				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("CrearDatabase.errorTitle"), JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		query.cerrar();
-		
-		return defaultCollation;
-	}
-	
-	private Vector<String> getCollations(){
-		CQuery query = new CQuery(connection);
-		String sqlTxt = "SELECT * FROM `information_schema`.`COLLATIONS`";
-
-		if(query.executeQuery(sqlTxt) > 0){
-			return query.getStringSet(1);
-		}		
-		query.cerrar();
-		return null;
 	}
 }

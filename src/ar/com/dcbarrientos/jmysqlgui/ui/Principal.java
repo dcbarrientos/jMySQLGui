@@ -28,6 +28,7 @@ package ar.com.dcbarrientos.jmysqlgui.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -39,6 +40,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -127,6 +129,8 @@ public class Principal extends JFrame {
 	//JButton jbImportTextfile = new JButton();
 	//JButton jbExportTableODBC = new JButton();
 	private JButton jbAcercade;	
+
+	private JPanel statusBar;
 	
 	public ImageIcon addFieldIcon;
 	public ImageIcon closeIcon;
@@ -221,6 +225,7 @@ public class Principal extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(desktop, BorderLayout.CENTER);
 		getContentPane().add(getToolBar(), BorderLayout.PAGE_START);
+		getContentPane().add(getStatusBar(), BorderLayout.SOUTH);
 		updateEstadoConexion();		
 	}
 	
@@ -397,6 +402,11 @@ public class Principal extends JFrame {
 		jbReloadPrivileges.setToolTipText("Reload user privileges");
 		//jbReloadPrivileges.setMargin(insets0);
 		jbReloadPrivileges.getAccessibleContext().setAccessibleName("Reload user privileges");
+		jbReloadPrivileges.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				//TODO Falata evento para ReloadPrivileges
+			}
+		});
 		
 		jbAcercade = new JButton();
 		jbAcercade.setIcon(helpIcon);
@@ -758,6 +768,15 @@ public class Principal extends JFrame {
 		mi.setEnabled(isAvailableLookAndFeel(laf));
 		return mi;
 	}	
+	
+	private JPanel getStatusBar(){
+		statusBar = new JPanel();
+		statusBar.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JLabel statusLabel = new JLabel("Status bar..");
+		
+		statusBar.add(statusLabel);
+		return statusBar;
+	}
 	
 	/**
 	 * Stores the current L&F, and calls updateLookAndFeel, below

@@ -26,7 +26,6 @@
 
 package ar.com.dcbarrientos.jmysqlgui.database;
 
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
