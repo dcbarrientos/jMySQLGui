@@ -354,9 +354,8 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void mostrarDatos()
 	{		
-		String valor = (String) jTable1.getValueAt(filaSeleccionada, 0);
-		//TODO Todavia no hice este proc.
-		//principal.mostrarDatos(valor);
+		String tableName = (String) jTable1.getValueAt(filaSeleccionada, 0);
+		admin.setSelectedTable(database.getName(), tableName, MdiAdmin.TABLE_DATA_TAB_INDEX);
 	}
 	
 	/**
@@ -364,9 +363,8 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void mostrarEstructura()
 	{
-		String valor = (String) jTable1.getValueAt(filaSeleccionada, 0);
-		//TODO todavia no hice este proc
-		//principal.mostrarEstructura(valor);
+		String tableName = (String) jTable1.getValueAt(filaSeleccionada, 0);
+		admin.setSelectedTable(database.getName(), tableName, MdiAdmin.TABLE_INFO_TAB_INDEX);
 	}
 	
 	/**

@@ -40,7 +40,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.tree.TreePath;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
@@ -71,8 +70,12 @@ public class MdiAdmin extends JPanel{
 	DatabaseTree dbTree;
 	private DatabaseTab dbTab;
 	private TableInfoTab tableInfoTab;
-	JTabbedPane tabbedPane;
-	ImageIcon databaseIcon;
+	private TableDataTab tableDataTab;
+	
+	private JTabbedPane tabbedPane;
+	private ImageIcon databaseIcon;
+	private ImageIcon tableIcon;
+	private ImageIcon dataIcon;
 	
 	public MdiAdmin(ResourceBundle resource, CConnection connection){
 		this.resource = resource;
@@ -101,6 +104,8 @@ public class MdiAdmin extends JPanel{
 		scrollPane_1.setViewportView(lstMensajes);
 		
 		databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
+		tableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/table.gif"));
+		dataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Table2.gif"));
 		
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -135,6 +140,7 @@ public class MdiAdmin extends JPanel{
 		
 		dbTab = new DatabaseTab(this, connection.getConnection());
 		tableInfoTab = new TableInfoTab(this, connection.getConnection(), resource);
+		tableDataTab = new TableDataTab(this, connection.getConnection(), resource);
 		
 		scrollTreeDatabase.setViewportView(dbTree);
 	}
@@ -207,8 +213,7 @@ public class MdiAdmin extends JPanel{
 			tabbedPane.setSelectedIndex(DATABASE_TAB_INDEX);
 		refresh();
 	}
-	
-	
+		
 	/**
 	 * Refresca la apariencia después que cambiaron los datos. 
 	 */
@@ -252,12 +257,16 @@ public class MdiAdmin extends JPanel{
 		//TODO Informar a TableInfo que tabla debe mostrar.
 		//TODO Hacer la solapa que muestra los datos.
 		tableInfoTab.setSelectedTable(getDatabase(databaseName), tableName);
+		tableDataTab.setSelectedTable(databaseName, tableName);
 		
 		if(tabbedPane.getTabCount()<3){
 			setSelectedDatabase(databaseName, false);
 		}
 		if(tabbedPane.getTabCount()<4){
-			tabbedPane.insertTab(resource.getString("TableInfoTab.title"), null, tableInfoTab, null, TABLE_INFO_TAB_INDEX);
+			//TODO Cargar los iconos para estas solapas.
+			
+			tabbedPane.insertTab(resource.getString("TableInfoTab.title"), tableIcon, tableInfoTab, null, TABLE_INFO_TAB_INDEX);
+			tabbedPane.insertTab(resource.getString("TableDataTab.title"), dataIcon, tableDataTab, null, TABLE_DATA_TAB_INDEX);
 		}
 		tabbedPane.setTitleAt(TABLE_INFO_TAB_INDEX, resource.getString("TableInfoTab.title") + " " + tableName);
 		tabbedPane.setSelectedIndex(solapa);
@@ -302,9 +311,15 @@ public class MdiAdmin extends JPanel{
 	 * Es conveniente llamar este procedimiento cuando realiza una operación sobre
 	 * una base de datos (agregar, eliminar) o una tabla (agregar, eliminar, modificar).
 	 */
-	public void refreshNewDatabase(){
+	public void refreshAll(){
 		cargarInformacion();
 		dbTree.setDatabases(databases);
+		
+		if(selectedDatabaseName != null)
+			dbTree.selectDatabaseByName(selectedDatabaseName);
+		else
+			dbTree.expandDatabases();
+		
 		refresh();
 	}
 	
@@ -322,7 +337,7 @@ public class MdiAdmin extends JPanel{
 					String msg = getSelectedDatabase() + " " + resource.getString("DropDatabase.success");
 					JOptionPane.showMessageDialog(null, msg, resource.getString("DropDatabase.title"), JOptionPane.INFORMATION_MESSAGE);
 					//Actualiza la estructura de datos con la base de datos y el Tree con la lista de bases de datos y tablas.
-					refreshNewDatabase();
+					refreshAll();
 					selectedDatabaseName = null;
 				}else{
 					String err = query.getErrCode() + ": " + query.getErrMsg();
@@ -347,7 +362,7 @@ public class MdiAdmin extends JPanel{
 					String msg = getSelectedTable() + " " + resource.getString("DropTable.success");
 					JOptionPane.showMessageDialog(null, msg, resource.getString("DropTable.title"), JOptionPane.INFORMATION_MESSAGE);
 					selectedTableName = null;
-					refreshNewDatabase();
+					refreshAll();
 					dbTree.selectDatabaseByName(selectedDatabaseName);
 				}else{
 					String err = query.getErrCode() + ": " + query.getErrMsg();
@@ -365,4 +380,7 @@ public class MdiAdmin extends JPanel{
 		}
 	}
 	
+	public void expandDatabases(){
+		dbTree.expandDatabases();
+	}
 }

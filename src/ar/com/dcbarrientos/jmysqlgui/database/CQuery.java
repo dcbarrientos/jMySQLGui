@@ -27,6 +27,7 @@
 package ar.com.dcbarrientos.jmysqlgui.database;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -39,8 +40,10 @@ import java.util.Vector;
  */
 public class CQuery {
 	private Connection connection;
+	
 	private String errMsg;				//Mensaje con el error generado
 	private int errCode;				//Codigo del error
+	
 	private Statement st;
 	private ResultSet result;
 	private ResultSetMetaData meta;		//Información de la consulta realizada.
@@ -49,6 +52,7 @@ public class CQuery {
 	private Object[][] datos;			//Datos devueltos por la consulta.
 	private boolean customHeaders;		//Verdadero si se uso setHeaders.
 	private String[] headers;			//Nombres de las columnas.
+	private PreparedStatement ps;
 	
 	/**
 	 * Constructor del objeto CQuery el cual maneja las consultas.
@@ -73,9 +77,7 @@ public class CQuery {
 			result = st.executeQuery(sqlTxt);
 			
 			//Obtengo la cantidad de filas devuelta por la consulta.
-			result.last();
-			rowCount = result.getRow();
-			result.beforeFirst();			
+			rowCount = getRowCount(result);
 			
 			//Obtengo la cantidad de columnas que tiene la consulta.
 			meta = result.getMetaData();
@@ -121,6 +123,19 @@ public class CQuery {
 		return result;
 	}
 	
+	private int getRowCount(ResultSet r){
+		int rows = -1; 
+		try {
+			r.last();
+			rows = r.getRow();
+			r.beforeFirst();
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+		}
+		
+		return rows;
+	}
+	
 	/**
 	 * Cierra la consulta, y el statement generados.
 	 */
@@ -130,6 +145,8 @@ public class CQuery {
 				result.close();
 			if(st != null)
 				st.close();
+			if(ps != null)
+				ps.close();
 		} catch (SQLException e) {
 			error(e.getErrorCode(), e.getMessage());
 		}
@@ -214,5 +231,63 @@ public class CQuery {
 	 */
 	public ResultSet getResultSet(){
 		return result;
+	}
+	
+	public PreparedStatement setPrepareStatement(String sql){
+		try {
+			ps = connection.prepareStatement(sql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return ps;
+	}
+
+	public boolean setString(int orden, String valor){
+		try {
+			ps.setString(orden, valor);
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+			return false;
+		}
+		return true;
+	}
+	
+	public boolean setInt(int orden, int valor){
+		try {
+			ps.setInt(orden, valor);
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+			return false;
+		}
+		return true;
+	}
+
+	public boolean executePreparedStatement(){
+		try {
+			return ps.execute();
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+		}
+		return false;
+	}
+	
+	public int executeQueryPreparedStatement(){
+		int rowCount = -1;
+		System.out.println(ps.toString());
+		try {
+			result = ps.executeQuery();
+			
+			rowCount = getRowCount(result);
+			
+			meta = result.getMetaData();
+			columnCount = meta.getColumnCount();
+		} catch (SQLException e) {
+			error(e.getErrorCode(), e.getMessage());
+			cerrar();
+		}
+		
+		return rowCount;
 	}
 }

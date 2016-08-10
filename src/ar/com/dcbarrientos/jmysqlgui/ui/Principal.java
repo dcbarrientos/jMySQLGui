@@ -165,16 +165,16 @@ public class Principal extends JFrame {
 	public ImageIcon copyTableIcon;
 	public ImageIcon emptyTableIcon;
 	public ImageIcon tablePropertiesIcon;
-	public ImageIcon primerRecordIcon;
-	public ImageIcon anteriorRecordIcon;
-	public ImageIcon siguienteRecordIcon;
-	public ImageIcon ultimoRecordIcon;
-	public ImageIcon insertDataRecordIcon;
-	public ImageIcon deleteRecordIcon;
-	public ImageIcon editRecordIcon;
-	public ImageIcon aceptarRecordIcon;
-	public ImageIcon cancelarRecordIcon;
-	public ImageIcon refreshDataIcon;
+	//public ImageIcon primerRecordIcon;
+	//public ImageIcon anteriorRecordIcon;
+	//public ImageIcon siguienteRecordIcon;
+	//public ImageIcon ultimoRecordIcon;
+	//public ImageIcon insertDataRecordIcon;
+	//public ImageIcon deleteRecordIcon;
+	//public ImageIcon editRecordIcon;
+	//public ImageIcon aceptarRecordIcon;
+	//public ImageIcon cancelarRecordIcon;
+	//public ImageIcon refreshDataIcon;
 	public ImageIcon dropFieldIcon;
 	public ImageIcon campoPrimarioIcon;
 	public ImageIcon campoSecundarioIcon;
@@ -391,9 +391,9 @@ public class Principal extends JFrame {
 		jbRefresh.setToolTipText("Refresh");
 		//jbRefresh.setMargin(insets0);
 		jbRefresh.getAccessibleContext().setAccessibleName("Refresh");
-		jbRefresh.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				refresh();
+		jbRefresh.addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e){
+				admin.refreshAll();
 			}
 		});
 		
@@ -405,6 +405,7 @@ public class Principal extends JFrame {
 		jbReloadPrivileges.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
 				//TODO Falata evento para ReloadPrivileges
+				admin.expandDatabases();
 			}
 		});
 		
@@ -558,6 +559,12 @@ public class Principal extends JFrame {
 		jMenuToolsRefresh.setText("Refresh");
 		jMenuToolsRefresh.setToolTipText("Refresh");
 		jMenuToolsRefresh.setIcon(refreshIcon);
+		jMenuToolsRefresh.addActionListener(new ActionListener() {			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				admin.refreshAll();
+			}
+		});
 		
 		jMenuToolsCreateDatabase = new JMenuItem();
 		jMenuToolsCreateDatabase.setVisible(true);
@@ -837,7 +844,7 @@ public class Principal extends JFrame {
 		connectionIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Connection.gif"));
 		createDatabaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CreateDatabase.gif"));
 		createTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CreateTable.gif"));
-		dataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Table2.gif"));
+		//dataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Table2.gif"));
 		//databaseIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Database.gif"));
 		//database2Icon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/database2.gif"));
 		//databaseServerIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DatabaseServer.gif"));
@@ -865,16 +872,16 @@ public class Principal extends JFrame {
 		//copyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Copytable.gif"));
 		//emptyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Emptytable.gif"));
 		//tablePropertiesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/TableProperties.gif"));
-		primerRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Primero.gif"));
-		anteriorRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Anterior.gif"));
-		siguienteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Siguiente.gif"));
-		ultimoRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Ultimo.gif"));
-		insertDataRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/InsertarRegistro.gif"));
-		deleteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DeleteRecord.gif"));
-		editRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/EditRecord.gif"));
-		aceptarRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/AceptarEdit.gif"));
-		cancelarRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CancelarEdit.gif"));
-		refreshDataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/RefreshData.gif"));
+		//primerRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Primero.gif"));
+		//anteriorRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Anterior.gif"));
+		//siguienteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Siguiente.gif"));
+		//ultimoRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Ultimo.gif"));
+		//insertDataRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/InsertarRegistro.gif"));
+		//deleteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DeleteRecord.gif"));
+		//editRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/EditRecord.gif"));
+		//aceptarRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/AceptarEdit.gif"));
+		//cancelarRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/CancelarEdit.gif"));
+		//refreshDataIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/RefreshData.gif"));
 		dropFieldIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/dropField.gif"));
 		campoPrimarioIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/campo_primario.gif"));
 		campoSecundarioIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/campo_secundario.gif"));
@@ -967,7 +974,7 @@ public class Principal extends JFrame {
 	private void crearDatabase(){
 		CrearDatabase cd = new CrearDatabase(this, cconnection.getConnection(), resource);
 		if(cd.showDialog()){
-			admin.refreshNewDatabase();
+			admin.refreshAll();
 		}
 		
 	}

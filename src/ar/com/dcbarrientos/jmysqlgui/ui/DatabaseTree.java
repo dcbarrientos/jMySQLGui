@@ -138,6 +138,8 @@ public class DatabaseTree extends JTree{
 				databaseTreeValueChanged(e);
 			}
 		});
+		
+		expandDatabases();
 	}
 	
 	/**
@@ -259,7 +261,7 @@ public class DatabaseTree extends JTree{
 	public void refresh(){
 		vaciar();
 		cargarDatos();
-		expandRow(1);
+		expandDatabases();
 
 		revalidate();		
 		repaint();
@@ -273,6 +275,7 @@ public class DatabaseTree extends JTree{
 	 * Selecciona un nodo a partir de su nombre
 	 * @param nombre Nombre del nodo a seleccionar.
 	 */
+	/*
 	public void seleccionarPorNombre(String nombre){
 		nodoEncontrado = false;
 		int row = indexByNode(id, nombre);
@@ -282,7 +285,7 @@ public class DatabaseTree extends JTree{
 		}else
 			setSelectionRow(ROOT_INDEX);
 	}
-
+*/
 	
 	/**
 	 * Busca el nodo que contiene el texto nombre. Debo poner encontrado en false

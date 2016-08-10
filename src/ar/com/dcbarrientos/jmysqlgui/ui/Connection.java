@@ -35,6 +35,7 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -46,13 +47,9 @@ import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class Connection extends JDialog{
-	
-	/**
-	 * 
-	 */
+public class Connection extends JDialog{	
 	private static final long serialVersionUID = 1L;
-    // Variables declaration - do not modify                     
+	
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnConnect;
     private javax.swing.JPanel jPanel1;
@@ -67,7 +64,6 @@ public class Connection extends JDialog{
     private javax.swing.JPasswordField txtPass;
     private javax.swing.JTextField txtPort;
     private javax.swing.JTextField txtUser;
-    // End of variables declaration                   
 	
     Principal principal;
     ResourceBundle resource;
@@ -93,52 +89,43 @@ public class Connection extends JDialog{
 		cconnection = new CConnection();
 		
         jPanel1 = new JPanel();
-        lblHost = new JLabel();
-        txtHost = new JTextField();
-        txtUser = new JTextField();
-        txtPort = new JTextField();
+        
+        lblHost = new JLabel(resource.getString("Connection.host"));
+        txtHost = new JTextField("localhost");
+
+        lblUser = new JLabel(resource.getString("Connection.user"));
+        txtUser = new JTextField("root");
+        
+        lblPort = new JLabel(resource.getString("Connection.port"));
+        txtPort = new JTextField("3306");
+        
+        lblPass = new JLabel(resource.getString("Connection.pass"));
         txtPass = new JPasswordField();
+        
+        lblDatabase = new JLabel(resource.getString("Connection.database"));
         txtDatabase = new JTextField();
-        lblUser = new JLabel();
-        lblPort = new JLabel();
-        lblPass = new JLabel();
-        lblDatabase = new JLabel();
-        lblComment = new JLabel();
+
+        lblComment = new JLabel(resource.getString("Connection.comment"));
+        
         btnConnect = new JButton();
+        btnConnect.setText(resource.getString("Connection.btnConectar"));
         btnConnect.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
         		btnConnectMouseClicked(e);
         	}
         });
+        
         btnCancel = new JButton();
+        btnCancel.setText(resource.getString("Connection.btnCancelar"));
         btnCancel.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
+        		btnCancelMouseClicked(e);
         	}
         });
         
-        setTitle(resource.getString("Connection.title"));
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        lblHost.setText(resource.getString("Connection.host"));
-        txtHost.setText("localhost");
-
-        lblUser.setText(resource.getString("Connection.user"));
-        txtUser.setText("root");
-
-        lblPort.setText(resource.getString("Connection.port"));
-        txtPort.setText("3306");
-
-        lblPass.setText(resource.getString("Connection.pass"));
-        txtPass.setText("");
-
-        lblDatabase.setText(resource.getString("Connection.database"));
-        txtDatabase.setText("");
-
-        lblComment.setText(resource.getString("Connection.comment"));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1Layout.setHorizontalGroup(
@@ -192,20 +179,6 @@ public class Connection extends JDialog{
         );
         jPanel1.setLayout(jPanel1Layout);
 
-        btnConnect.setText(resource.getString("Connection.btnConectar"));
-        btnConnect.addMouseListener(new MouseAdapter(){
-        	public void mouseClicked(MouseEvent e){
-        		btnConnectMouseClicked(e);
-        	}
-        });
-
-        btnCancel.setText(resource.getString("Connection.btnCancelar"));
-        btnCancel.addMouseListener(new MouseAdapter() {
-        	public void mouseClicked(MouseEvent e){
-        		btnCancelMouseClicked(e);
-        	}
-		});
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -235,6 +208,8 @@ public class Connection extends JDialog{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        setTitle(resource.getString("Connection.title"));
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);        
         pack();
         setLocationRelativeTo(principal);
 	}
@@ -273,6 +248,8 @@ public class Connection extends JDialog{
 		if(cconnection.conectar(txtHost.getText(), txtUser.getText(), new String(txtPass.getPassword()), Integer.parseInt(txtPort.getText()), txtDatabase.getText())){
 			setVisible(false);
 			dispose();
+		}else{
+			JOptionPane.showMessageDialog(null, resource.getString("Connection.error"), resource.getString("Connection.title"), JOptionPane.ERROR_MESSAGE);
 		}
 	}
 }

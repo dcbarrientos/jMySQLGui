@@ -26,6 +26,8 @@
 
 package ar.com.dcbarrientos.jmysqlgui.database;
 
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
@@ -36,6 +38,8 @@ import javax.swing.table.TableModel;
 public class CTableModel{
 	private Object[][] datos;
 	private String[] headers;
+	private boolean[] editableCells;
+	private TableModel tm;
 	
 	public CTableModel(Object[][] datos, String[] headers){
 		this.datos = datos;
@@ -48,7 +52,7 @@ public class CTableModel{
 	}
 	
 	public TableModel getTableModel(){
-		TableModel tm = null;
+		tm = null;
 		
 		if(datos != null && headers != null){
 			tm = new AbstractTableModel() {
@@ -57,6 +61,11 @@ public class CTableModel{
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
 					return datos[rowIndex][columnIndex];
+				}
+				
+				@Override
+				public void setValueAt(Object value, int rowIndex, int columnIndex){
+					datos[rowIndex][columnIndex] = value;
 				}
 				
 				@Override
@@ -73,7 +82,26 @@ public class CTableModel{
 				public String getColumnName(int columnIndex){
 					return headers[columnIndex];
 				}
+				
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex){
+					return editableCells[columnIndex];
+				}
 			};
+			tm.addTableModelListener(new TableModelListener() {			
+				@Override
+				public void tableChanged(TableModelEvent e)	{
+					// TODO Auto-generated method stub
+					System.out.print("(" + e.getFirstRow() + ", " + e.getColumn() + ") ");
+					System.out.println(tm.getColumnName(e.getColumn()) + ": " + tm.getValueAt(e.getFirstRow(), e.getColumn()));
+				}
+			});
+		}
+		
+		if(editableCells == null){
+			editableCells = new boolean[headers.length];
+			for(int i = 0; i < headers.length; i++)
+				editableCells[i] = false;
 		}
 		
 		return tm;
@@ -108,6 +136,8 @@ public class CTableModel{
 	}
 
 	
-	
+	public void setEditableCells(boolean[] editableCells){
+		this.editableCells = editableCells;
+	}
 	
 }
