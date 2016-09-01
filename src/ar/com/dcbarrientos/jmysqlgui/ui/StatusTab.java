@@ -79,7 +79,7 @@ public class StatusTab extends JPanel {
 		cantidadStatus = query.executeQuery(sql); 
 		if(cantidadStatus > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
-			tableStatus.setModel(cTableModel.getTableModel());
+			tableStatus.setModel(cTableModel);
 		}
 		query.cerrar();
 		

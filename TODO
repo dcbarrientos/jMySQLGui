@@ -1,0 +1,15 @@
+* Trabajar solapa Database.
+	* Boton Show table properties: Código para cargar la solapa con la descripción
+	  de la tabla.
+	* Empty table: Hacer procedimiento para vaciar una tabla.
+	  TRUCATE tabla;
+* Boton Copy table...: Procedimiento que llama el dialog Copiar tabla.
+* cuando selecciono una base de datos, la tabla que estaba seleccionada sigue estándolo. hay que corregir.
+* Cuando elimino la base de datos, sigue seleccionada.
+	
+* Hacer un JDialog para copiar una tabla.
+* Panel con los datos de una tabla.
+* Hacer procedimiento para editar datos en TableDataTab
+* Verificar que todos los que usan CQuery usen el getResultSetClasses del CTableModel para especificar el 
+  tipo de dato de cada columna.
+* Cerrar CQuery al terminar en TableDataTab.

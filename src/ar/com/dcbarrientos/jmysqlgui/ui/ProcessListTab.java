@@ -82,7 +82,7 @@ public class ProcessListTab extends JPanel{
 		cantidadProcesos = query.executeQuery(sql); 
 		if(cantidadProcesos > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
-			tableProcesos.setModel(cTableModel.getTableModel());			
+			tableProcesos.setModel(cTableModel);			
 		}
 		query.cerrar();
 		

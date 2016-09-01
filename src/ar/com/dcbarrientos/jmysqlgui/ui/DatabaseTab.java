@@ -36,6 +36,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -157,7 +158,7 @@ public class DatabaseTab extends JPanel{
 		this.database = database;
 		CTableModel cTableModel= new CTableModel(getDatos(), getHeaders());
 		jLabel1.setText("  Base de datos " + database.getName() + ": " + cantidadFilas + " tabla(s)");
-		jTable1.setModel(cTableModel.getTableModel());
+		jTable1.setModel(cTableModel);
 
 	}
 	
@@ -177,31 +178,32 @@ public class DatabaseTab extends JPanel{
 	 * Genera un array con todas las tablas y sus respectivos datos.
 	 * @return array de tablas.
 	 */
-	private Object[][] getDatos(){	
+	private Vector<Object[]> getDatos(){
 		HashMap<String, CTabla> tablas = database.getTablas();
 		SortedSet<String> keys = new TreeSet<String>(tablas.keySet());
-		int columnCount = getHeaders().length;
-		cantidadFilas = database.getTableCount();
-		Object[][] datos = new Object[cantidadFilas][columnCount];
-		int fila = 0;
+		
+		Vector<Object[]> datos = new Vector<Object[]>();
+		Object[] registro;
+		
 		for(String key: keys){
 			CTabla elemento = tablas.get(key);
-			datos[fila][0] = elemento.getName();
-			datos[fila][1] = elemento.getTipo();
-			datos[fila][2] = elemento.getRow_format();
-			datos[fila][3] = elemento.getRows();
-			datos[fila][4] = elemento.getAvg_row_length();
-			datos[fila][5] = Funciones.getExtendedSize(elemento.getData_length());
-			datos[fila][6] = elemento.getMax_data_length();
-			datos[fila][7] = elemento.getIndex_length();
-			datos[fila][8] = elemento.getData_free();
-			datos[fila][9] = elemento.getAuto_increment();
-			datos[fila][10] = elemento.getCreate_time();
-			datos[fila][11] = elemento.getUpdate_time();
-			datos[fila][12] = elemento.getCheck_time();
-			datos[fila][13] = elemento.getCreate_options();
-			datos[fila][14] = elemento.getComment();
-			fila++;
+			registro = new Object[getHeaders().length];
+			registro[0] = elemento.getName();
+			registro[1] = elemento.getTipo();
+			registro[2] = elemento.getRow_format();
+			registro[3] = elemento.getRows();
+			registro[4] = elemento.getAvg_row_length();
+			registro[5] = Funciones.getExtendedSize(elemento.getData_length());
+			registro[6] = elemento.getMax_data_length();
+			registro[7] = elemento.getIndex_length();
+			registro[8] = elemento.getData_free();
+			registro[9] = elemento.getAuto_increment();
+			registro[10] = elemento.getCreate_time();
+			registro[11] = elemento.getUpdate_time();
+			registro[12] = elemento.getCheck_time();
+			registro[13] = elemento.getCreate_options();
+			registro[14] = elemento.getComment();
+			datos.addElement(registro);
 		}
 		
 		return datos;

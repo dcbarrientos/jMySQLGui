@@ -152,7 +152,7 @@ public class QueryEditorTab extends JPanel{
 		CQuery query = new CQuery(cconnection.getConnection());
 		if(query.executeQuery(sql) > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), query.getHeaders());
-			jtblSqlResult.setModel(cTableModel.getTableModel());
+			jtblSqlResult.setModel(cTableModel);
 			jtblSqlResult.repaint();
 			admin.addSQL(sql);
 		}else{

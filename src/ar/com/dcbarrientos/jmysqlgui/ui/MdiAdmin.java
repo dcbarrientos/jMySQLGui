@@ -77,9 +77,13 @@ public class MdiAdmin extends JPanel{
 	private ImageIcon tableIcon;
 	private ImageIcon dataIcon;
 	
-	public MdiAdmin(ResourceBundle resource, CConnection connection){
+	private Principal principal;
+	
+	public MdiAdmin(Principal principal, ResourceBundle resource, CConnection connection){
 		this.resource = resource;
 		this.connection = connection;
+		this.principal = principal;
+		
 		setLayout(new BorderLayout(0, 0));
 		
 		initComponents();
@@ -383,4 +387,9 @@ public class MdiAdmin extends JPanel{
 	public void expandDatabases(){
 		dbTree.expandDatabases();
 	}
+	
+	public Principal getPrincipal(){
+		return principal;
+	}
+		
 }

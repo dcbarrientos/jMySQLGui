@@ -30,6 +30,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.sql.Connection;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -96,9 +97,10 @@ public class TableColumnsPanel extends JPanel{
 					resource.getString("TableCollumnPanel.header3"), resource.getString("TableCollumnPanel.header4"),
 					resource.getString("TableCollumnPanel.header5"), resource.getString("TableCollumnPanel.header6"),
 					resource.getString("TableCollumnPanel.header7")};
-			Object[][] datos = query.getDatos();
+			//Object[][] datos = query.getDatos();
+			Vector<Object[]> datos = query.getDatos();
 			CTableModel tm = new CTableModel(datos, headers);
-			table.setModel(tm.getTableModel());
+			table.setModel(tm);
 			lblCountValue.setText(Integer.toString(cantidadColumnas));
 		}
 	}

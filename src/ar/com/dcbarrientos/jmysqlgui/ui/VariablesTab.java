@@ -70,7 +70,7 @@ public class VariablesTab extends JPanel{
 		cantidadVariables = query.executeQuery(sql); 
 		if(cantidadVariables > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
-			tableVariables.setModel(cTableModel.getTableModel());
+			tableVariables.setModel(cTableModel);
 		}
 		query.cerrar();
 		

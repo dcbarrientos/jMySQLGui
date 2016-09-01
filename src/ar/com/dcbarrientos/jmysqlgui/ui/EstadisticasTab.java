@@ -81,7 +81,7 @@ public class EstadisticasTab extends JPanel{
 		cantidadEstadisticas = query.executeQuery(sql); 
 		if(cantidadEstadisticas > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);
-			TableModel tm = cTableModel.getTableModel();
+			TableModel tm = cTableModel;
 			
 			TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(tm);
 			tableStatus.setModel(tm);

@@ -920,7 +920,7 @@ public class Principal extends JFrame {
 	 * Procedimiento que crea el JPanel que contiene el administrador de la base de datos.
 	 */
 	public void conectar(){
-		admin = new MdiAdmin(resource, cconnection);
+		admin = new MdiAdmin(this, resource, cconnection);
 		admin.setConnection(cconnection);
 		desktop.add(admin, BorderLayout.CENTER);
 		//add(admin, BorderLayout.CENTER);

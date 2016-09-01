@@ -32,6 +32,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.Vector;
 
 /**
@@ -41,6 +43,8 @@ import java.util.Vector;
 public class CQuery {
 	private Connection connection;
 	
+	public static int ERROR = -1;
+	
 	private String errMsg;				//Mensaje con el error generado
 	private int errCode;				//Codigo del error
 	
@@ -49,7 +53,8 @@ public class CQuery {
 	private ResultSetMetaData meta;		//Información de la consulta realizada.
 	private int rowCount;					//cantidad de registros devueltos por la consulta.
 	private int columnCount;			//Cantidad de columnas que tiene la consulta.
-	private Object[][] datos;			//Datos devueltos por la consulta.
+	//private Object[][] datos;			//Datos devueltos por la consulta.
+	private Vector<Object[]> datos;
 	private boolean customHeaders;		//Verdadero si se uso setHeaders.
 	private String[] headers;			//Nombres de las columnas.
 	private PreparedStatement ps;
@@ -73,7 +78,7 @@ public class CQuery {
 		rowCount = -1;
 		
 		try {
-			st = connection.createStatement();
+			st = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 			result = st.executeQuery(sqlTxt);
 			
 			//Obtengo la cantidad de filas devuelta por la consulta.
@@ -157,14 +162,16 @@ public class CQuery {
 	 * los datos resultantes.
 	 * @return Devuelve un array con los datos de la consulta.
 	 */
-	public Object[][] getDatos(){
-		datos = new Object[rowCount][columnCount];
-		int f = 0;
+	public Vector<Object[]> getDatos(){
+		datos = new Vector<Object[]>();
+		Object[] registro;
 		try {
 			while(result.next()){
+				registro = new Object[columnCount];
 				for(int c = 0; c < columnCount; c++)
-					datos[f][c] = result.getObject(c+1);
-				f++;
+					registro[c] = result.getObject(c + 1);
+
+				datos.addElement(registro);
 			}
 		} catch (SQLException e) {
 			error(e.getErrorCode(), e.getMessage());
@@ -233,6 +240,12 @@ public class CQuery {
 		return result;
 	}
 	
+	/**
+	 * Genera un nuevo PreparedStatement para la consulta abierta.
+	 * @param sql Es la Sql plantilla para el PreparedStatement
+	 * @return Devuelve un PreparedStatement generado a partir de la sql plantilla
+	 *         ingresada.
+	 */
 	public PreparedStatement setPrepareStatement(String sql){
 		try {
 			ps = connection.prepareStatement(sql);
@@ -290,4 +303,82 @@ public class CQuery {
 		
 		return rowCount;
 	}
+	
+	/**
+	 * Procedimiento que genera un array con los tipos de datos de cada
+	 * columna devuelta en el ResultSet.
+	 * @return Array con el tipo de datos que contiene cada columna del 
+	 *        ResultSet.
+	 */
+	public Class<?>[] getResultSetClasses(){
+		Class<?>[] classes = new Class<?>[headers.length];
+		for(int i = 0; i < columnCount; i++){
+			try {
+				classes[i] = Class.forName(meta.getColumnClassName(i + 1));
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			} catch (SQLException e) {
+				error(e.getErrorCode(), e.getMessage());
+				return null;
+			}
+		}
+		
+		
+		return classes;
+	}
+	
+	public boolean updateValue(Object valor, String clase, int rowIndex, int columnIndex){
+		/*
+		 * INSERT INTO `aaa`.`qqqq` (`tinyint`, `smallint`, `mediumint`, `int`, `bigint`, `bit`, `float`, 
+		 * `double`, `decimal`, `char`, `varchar`, `tinytext`, `text`, `mediumtext`, `longtext`, `binary`, 
+		 * `varbinary`, `tinyblob`, `blob`, `mediumblob`, `longblob`, `date`, `time`, `year`, `datetime`, 
+		 * `timestamp`, `point`, `linestring`, `polygon`, `geomety`, `multipoint`, `multilinestring`, 
+		 * `multipolygon`, `geometrycollection`, `enum`, `set`) 
+		 * VALUES ('1', '2', '3', '4', '5', b'0', '7', '8', '9', 'a', 'a', 'a', 'a', 'a', 'a', '1', '2', 
+		 * NULL, NULL, NULL, NULL, '2016-08-02', '17:40:00', '2016', '2016-08-10 04:23:32', '2016-08-10 13:13:27', 
+		 * GeomFromText('POINT(10 20)',0), GeomFromText('LINESTRING(10 20,30 40)',2), GeomFromText('POLYGON((10 10,30 30,10 20,20 10))',0), 
+		 * GeomFromText('POINT(10 20)',0), GeomFromText('MULTIPOINT(10 20,30 10)',0), 
+		 * GeomFromText('MULTILINESTRING((10 20,20 10),(20 10,10 20))',0), GeomFromText('MULTIPOLYGON(((1 2,3 4,5 6,7 8)))',0), 
+		 * GeomFromText('GEOMETRYCOLLECTION()',0), 'Y', 'Value B');
+		 * */
+		for(int i = 0; i < columnCount; i++){
+			try {
+				System.out.println("Clase: " + meta.getColumnClassName(i+1) + " Nombre: " + meta.getColumnName(i+1));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return true;
+	}
+	
+	public int updadteRows(String databaseName, String tableName, String[] columnNames, Vector<Object[]> newDatos, TreeMap<Integer, Object[]> oldDatos){
+		int result = -1;
+
+		String sqlTxt1 = String.format("UPDATE `%s`.`%s` SET", databaseName, tableName);		
+		String sqlValue = " `%s`='%s'";															
+		String sqlTxt2 = "";
+		Iterator<Integer> it = oldDatos.keySet().iterator();
+		
+		while(it.hasNext()){
+			int r = it.next();
+			String sqlTxt = sqlTxt1;
+			for(int c = 0; c < columnNames.length; c++){
+				sqlTxt += String.format(sqlValue, columnNames[c], String.valueOf(newDatos.get(r)[c]));
+				sqlTxt2 += String.format(sqlValue, columnNames[c],String.valueOf(oldDatos.get(r)[c]));
+				if(c < columnNames.length - 1){
+					sqlTxt += ",";
+					sqlTxt2 += " AND";
+				}
+			}
+			sqlTxt += " WHERE " + sqlTxt2 + ";";
+			System.out.println(sqlTxt);
+			result = executeUpdate(sqlTxt);
+		}
+		
+		return result;
+	}	
 }
