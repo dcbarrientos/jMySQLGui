@@ -27,23 +27,34 @@
 package ar.com.dcbarrientos.jmysqlgui.ui;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Connection;
+import java.util.Iterator;
 import java.util.ResourceBundle;
+import java.util.TreeMap;
+import java.util.Vector;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
 import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
@@ -58,6 +69,8 @@ public class TableDataTab extends JPanel{
 	private MdiAdmin admin;
 	private Connection connection;
 	private ResourceBundle resource;
+	private CQuery query;
+	private CTableModel model;
 	
 	private JLabel etiqueta;
 	private JTable jtDatos;
@@ -106,7 +119,15 @@ public class TableDataTab extends JPanel{
 		etiqueta = new JLabel("Etiqueta Base de datos.");
 		
 		jtDatos = new JTable();
+		
+		jtDatos.setCellSelectionEnabled(true);
+		jtDatos.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		jtDatos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		KeyStroke tabStroke = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+		jtDatos.getActionMap().put("tab", tabAction());
+		jtDatos.getInputMap(JComponent.WHEN_FOCUSED).put(tabStroke, "tab");
+		
 		
 		scroll = new JScrollPane(jtDatos);
 		
@@ -170,12 +191,18 @@ public class TableDataTab extends JPanel{
 		jbInsertar.setToolTipText(resource.getString("TableDataTab.jbInsertar.tooltip"));
 		jbInsertar.setIcon(insertDataRecordIcon);
 		jbInsertar.getAccessibleContext().setAccessibleName(resource.getString("TableDataTab.jbInsertar.accessiblename"));
+		jbInsertar.setVisible(false);
 		
 		deleteRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/DeleteRecord.gif"));
 		jbBorrar = new JButton();
 		jbBorrar.setToolTipText(resource.getString("TableDataTab.jbBorrar.tooltip"));
 		jbBorrar.setIcon(deleteRecordIcon);
 		jbBorrar.getAccessibleContext().setAccessibleName(resource.getString("TableDataTab.jbBorrar.accessiblename"));
+		jbBorrar.addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e){
+				deleteRow();
+			}
+		});
 		
 		editRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/EditRecord.gif"));
 		jbEditar = new JButton();
@@ -187,6 +214,7 @@ public class TableDataTab extends JPanel{
 				jbEditarMouseClicked(e);
 			}
 		});
+		jbEditar.setVisible(false);
 		
 		aceptarRecordIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/AceptarEdit.gif"));
 		jbAceptar = new JButton();
@@ -206,7 +234,7 @@ public class TableDataTab extends JPanel{
 		jbCancelar.getAccessibleContext().setAccessibleName(resource.getString("TableDataTab.jbCancelar.tooltip"));
 		jbCancelar.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
-				jbCancelarMouseClicked(e);
+				refreshTable();
 			}
 		});
 		
@@ -217,7 +245,7 @@ public class TableDataTab extends JPanel{
 		jbRefresh.getAccessibleContext().setAccessibleName(resource.getString("TableDataTab.jbRefresh.accessiblename"));
 		jbRefresh.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e){
-				jbRefreshMouseClicked(e);
+				refreshTable();
 			}
 		});
 		
@@ -266,6 +294,12 @@ public class TableDataTab extends JPanel{
 	}
 	
 	public void setSelectedTable(String databaseName, String tableName){
+		if(model != null && model.isEdited()){
+			if(JOptionPane.showConfirmDialog(null, resource.getString("TableDataTab.notSavedError"), resource.getString("TableDataTab.title"), JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+				guardarDatos();
+			}
+		}
+		
 		this.databaseName = databaseName;
 		this.tableName = tableName;
 		cargarDatos();
@@ -276,19 +310,30 @@ public class TableDataTab extends JPanel{
 		String sqlTxt = "SELECT * FROM `" + databaseName + "`.`" + tableName + "`";
 		sqlTxt += getLimite();
 		
-		CQuery query = new CQuery(connection);
+		query = new CQuery(connection);
 		if((cReg = query.executeQuery(sqlTxt)) > 0){
-			CTableModel model = new CTableModel(query.getDatos(), query.getHeaders());
+			model = new CTableModel(query.getDatos(), query.getHeaders());
 			
 			boolean[] editableCells = new boolean[query.getHeaders().length];
 			for(int i = 0; i < query.getHeaders().length; i++)
 				editableCells[i] = true;
 			
+			//Defino los campos editabes. En este caso, todos.
 			model.setEditableCells(editableCells);
-			jtDatos.setModel(model.getTableModel());
+			//Defino el tipo de campo que voy a usar.
+			model.setClasses(query.getResultSetClasses());
+
+			jtDatos.setModel(model);
+			jtDatos.getModel().addTableModelListener(new TableModelListener() {				
+				@Override
+				public void tableChanged(TableModelEvent e) {
+					editResultSetCell(e);
+				}
+			});
 			etiqueta.setText("Tabla: " + tableName + " (" + cReg + " registros).");
 		}
 		query.cerrar();
+		setEditEnabled(false);
 	}
 	
 	private String getLimite(){
@@ -317,24 +362,23 @@ public class TableDataTab extends JPanel{
 
 	private void setEditEnabled(boolean enabled){
 		jbEditar.setEnabled(!enabled);
+		jbBorrar.setEnabled(!enabled);
 		jbAceptar.setEnabled(enabled);
 		jbCancelar.setEnabled(enabled);
 	}
 
 	private void jbEditarMouseClicked(MouseEvent e){
-		setEditEnabled(true);
+		
 	}
 
 	private void jbAceptarMouseClicked(MouseEvent e){
-		setEditEnabled(false);
+		guardarDatos();
 	}
 	
-	private void jbCancelarMouseClicked(MouseEvent e){
-		setEditEnabled(false);
-	}
-
-	private void jbRefreshMouseClicked(MouseEvent e){
+	private void refreshTable(){
+		model.setEdited(false);
 		cargarDatos();
+		setEditEnabled(false);
 	}
 	
 	private void jbSiguienteMouseClicked(MouseEvent e){
@@ -354,4 +398,189 @@ public class TableDataTab extends JPanel{
 	private void jbUltimoMouseClicked(MouseEvent e){
 		jtDatos.setRowSelectionInterval(jtDatos.getRowCount()-1, jtDatos.getRowCount()-1);
 	}
+	
+	public void editResultSetCell(TableModelEvent e){
+		setEditEnabled(true);
+		
+	}
+	
+	public void guardarDatos(){
+		//Verifico si se editaron celdas.
+		if(model.getDatosOriginales().size() >= 0){
+			if(updadteRows(databaseName, tableName, model.getHeaders(), model.getDatos(), model.getDatosOriginales()) != CQuery.ERROR){
+				//model.setEdited(false);
+				//cargarDatos();
+				//setEditEnabled(false);
+				
+				//refreshTable();
+				model.resetDatosOriginales();
+			}else{
+				admin.addMessage(query.getErrCode() + ": " + query.getErrMsg());
+				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("TableDataTab.error.title"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		//Verifico si se agregaron filas.
+		if(model.getDatosNuevos().size() > 0){
+			if(insertRows(databaseName, tableName, model.getHeaders(), model.getDatos(), model.getDatosNuevos()) != CQuery.ERROR){
+				model.setEdited(false);
+			}else{
+				admin.addMessage(query.getErrCode() + ": " + query.getErrMsg());
+				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("TableDataTab.error.title"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		refreshTable();
+	}
+	
+	private AbstractAction tabAction(){
+		AbstractAction tab = new AbstractAction() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int rowIndex, columnIndex;
+				
+				if(jtDatos.getSelectedColumn() == jtDatos.getColumnCount()-1 && jtDatos.getSelectedRow() < jtDatos.getRowCount() - 1){
+					rowIndex = jtDatos.getSelectedRow() + 1;
+					columnIndex = 0;
+				}else if(jtDatos.getSelectedRow() == jtDatos.getRowCount() - 1 && jtDatos.getSelectedColumn() == jtDatos.getColumnCount() - 1){
+					model.addRow();
+					rowIndex = jtDatos.getRowCount() - 1;
+					columnIndex = 0;
+				}else{
+					rowIndex = jtDatos.getSelectedRow();
+					columnIndex = jtDatos.getSelectedColumn() + 1;
+					
+				}
+						
+				jtDatos.changeSelection(rowIndex, columnIndex, false, false);
+				jtDatos.editCellAt(rowIndex, columnIndex);
+			}
+		};
+		
+		return tab;
+	}
+
+	private int updadteRows(String databaseName, String tableName, String[] columnNames, Vector<Object[]> newDatos, TreeMap<Integer, Object[]> oldDatos){
+		CQuery query = new CQuery(connection);
+		
+		int result = 0;
+
+		String sqlTxt1 = String.format("UPDATE `%s`.`%s` SET", databaseName, tableName);		
+		String sqlValue = " `%s`='%s'";															
+		String sqlTxt2 = "";
+		Iterator<Integer> it = oldDatos.keySet().iterator();
+		
+		while(it.hasNext()){
+			int r = it.next();
+			if(!model.isNewRow(r) && !equalsRegistros(newDatos.get(r), oldDatos.get(r))){
+				String sqlTxt = sqlTxt1;
+				for(int c = 0; c < columnNames.length; c++){
+					sqlTxt += String.format(sqlValue, columnNames[c], String.valueOf(newDatos.get(r)[c]));
+					sqlTxt2 += String.format(sqlValue, columnNames[c],String.valueOf(oldDatos.get(r)[c]));
+					if(c < columnNames.length - 1){
+						sqlTxt += ",";
+						sqlTxt2 += " AND";
+					}
+				}
+				sqlTxt += " WHERE " + sqlTxt2 + ";";
+				System.out.println(sqlTxt);
+				int modificados = query.executeUpdate(sqlTxt);
+				if(modificados > 0)
+					result += modificados;
+				else{
+					//TODO No se pudo hacer el update, verificar el error.
+				}
+			}
+		}
+		query.cerrar();
+		
+		return result;
+	}	
+
+	
+	private int insertRows(String databaseName, String tableName, String[] columnNames, Vector<Object[]> datos, Vector<Integer> datosNuevos){
+		CQuery query = new CQuery(connection);
+		
+		int result = 0;
+		
+		String sqlTxt1 = "INSERT INTO `%s`.`%s` (";
+		Object[] registro;
+		
+		for(int index : datosNuevos){
+			String sqlTxt = String.format(sqlTxt1, databaseName, tableName);
+			String valores = "";
+			registro = datos.get(index);
+			//Verifico si la fila está vacía, así la ignoro.
+			if(!isEmptyRegistro(registro)){
+				for(int i = 0; i < registro.length; i++){
+					if(registro[i] != null){
+						sqlTxt += "`" + jtDatos.getColumnName(i) + "`, ";
+						valores += "'" + registro[i] + "', ";
+					}
+				}
+				sqlTxt = sqlTxt.substring(0, sqlTxt.length() - 2);
+				sqlTxt += ") VALUES (" + valores.substring(0, valores.length() - 2) + ");";
+
+				int modificados = query.executeUpdate(sqlTxt);
+				if(modificados > 0)
+					result += modificados;
+				else{
+					//TODO No se pudo hacer el update, verificar el error.
+				}
+				
+			}
+		}
+		query.cerrar();
+		
+		return result;
+	}
+	
+	private void deleteRow(){
+		
+		if(jtDatos.getSelectedRow() >= 0){
+			CQuery query = new CQuery(connection);
+
+			int respuesta = JOptionPane.showConfirmDialog(null, resource.getString("TableDataTab.deleteQuestion"), resource.getString("TableDataTab.title"), JOptionPane.YES_NO_OPTION);
+			if(respuesta == JOptionPane.YES_OPTION){
+				String sqlTxt = "DELETE FROM `%s`.`%s` WHERE %s;";
+				String valores = "";
+				String registro = "`%s`='%s'";
+				
+				for(int i = 0; i < jtDatos.getColumnCount(); i++){
+					valores += String.format(registro, jtDatos.getColumnName(i), jtDatos.getValueAt(jtDatos.getSelectedRow(), i));
+					if(i < jtDatos.getColumnCount() - 1)
+						valores += " AND ";
+				}
+				
+				sqlTxt = String.format(sqlTxt, databaseName, tableName, valores);
+				int modificados = query.executeUpdate(sqlTxt);
+				if(modificados < 0){
+					JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("TableDataTab.title"), JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			query.cerrar();
+			refreshTable();
+		}
+	}
+	
+	private boolean equalsRegistros(Object[] registro1, Object[] registro2){
+		if(registro1.length != registro2.length)
+			return false;
+		for(int i = 0; i < registro1.length; i++){
+			if(!registro1[i].equals(registro2[i]))
+				return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean isEmptyRegistro(Object[] registro){
+		for(int i=0; i<registro.length; i++){
+			if(registro[i] != null)
+				return false;
+		}
+		
+		return true;
+	}	
 }
+

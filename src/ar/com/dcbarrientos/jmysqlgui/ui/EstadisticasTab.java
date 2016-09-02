@@ -77,7 +77,6 @@ public class EstadisticasTab extends JPanel{
 		String[] headers = {resource.getString("Estadisticas.header1"), resource.getString("Estadisticas.header2")};
 		
 		CQuery query = new CQuery(cconnection.getConnection());
-		//query.setHeaders(headers);
 		cantidadEstadisticas = query.executeQuery(sql); 
 		if(cantidadEstadisticas > 0){
 			CTableModel cTableModel = new CTableModel(query.getDatos(), headers);

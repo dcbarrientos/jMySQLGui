@@ -32,8 +32,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.Vector;
 
 /**
@@ -355,30 +353,5 @@ public class CQuery {
 		return true;
 	}
 	
-	public int updadteRows(String databaseName, String tableName, String[] columnNames, Vector<Object[]> newDatos, TreeMap<Integer, Object[]> oldDatos){
-		int result = -1;
-
-		String sqlTxt1 = String.format("UPDATE `%s`.`%s` SET", databaseName, tableName);		
-		String sqlValue = " `%s`='%s'";															
-		String sqlTxt2 = "";
-		Iterator<Integer> it = oldDatos.keySet().iterator();
-		
-		while(it.hasNext()){
-			int r = it.next();
-			String sqlTxt = sqlTxt1;
-			for(int c = 0; c < columnNames.length; c++){
-				sqlTxt += String.format(sqlValue, columnNames[c], String.valueOf(newDatos.get(r)[c]));
-				sqlTxt2 += String.format(sqlValue, columnNames[c],String.valueOf(oldDatos.get(r)[c]));
-				if(c < columnNames.length - 1){
-					sqlTxt += ",";
-					sqlTxt2 += " AND";
-				}
-			}
-			sqlTxt += " WHERE " + sqlTxt2 + ";";
-			System.out.println(sqlTxt);
-			result = executeUpdate(sqlTxt);
-		}
-		
-		return result;
-	}	
+	
 }

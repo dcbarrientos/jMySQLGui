@@ -26,104 +26,139 @@
 
 package ar.com.dcbarrientos.jmysqlgui.database;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
+import java.util.TreeMap;
+import java.util.Vector;
+
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
  *
  */
-public class CTableModel{
-	private Object[][] datos;
+public class CTableModel extends AbstractTableModel{
+	private static final long serialVersionUID = 1L;
+	private Vector<Object[]> datos;
 	private String[] headers;
 	private boolean[] editableCells;
-	private TableModel tm;
+	private Class<?>[] classes;
+	private TreeMap<Integer, Object[]> datosOriginales;
+	private Vector<Integer> datosNuevos;
 	
-	public CTableModel(Object[][] datos, String[] headers){
+	public CTableModel(Vector<Object[]> datos, String[] headers){
 		this.datos = datos;
 		this.headers = headers;
+		resetDatos();
 	}
 	
 	public CTableModel(){
 		this.datos = null;
 		this.headers = null;
+		resetDatos();
+	}
+
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		return datos.elementAt(rowIndex)[columnIndex];
 	}
 	
-	public TableModel getTableModel(){
-		tm = null;
-		
-		if(datos != null && headers != null){
-			tm = new AbstractTableModel() {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public Object getValueAt(int rowIndex, int columnIndex) {
-					return datos[rowIndex][columnIndex];
-				}
-				
-				@Override
-				public void setValueAt(Object value, int rowIndex, int columnIndex){
-					datos[rowIndex][columnIndex] = value;
-				}
-				
-				@Override
-				public int getRowCount() {
-					return datos.length;
-				}
-				
-				@Override
-				public int getColumnCount() {
-					return headers.length;
-				}
-				
-				@Override
-				public String getColumnName(int columnIndex){
-					return headers[columnIndex];
-				}
-				
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex){
-					return editableCells[columnIndex];
-				}
-			};
-			tm.addTableModelListener(new TableModelListener() {			
-				@Override
-				public void tableChanged(TableModelEvent e)	{
-					// TODO Auto-generated method stub
-					System.out.print("(" + e.getFirstRow() + ", " + e.getColumn() + ") ");
-					System.out.println(tm.getColumnName(e.getColumn()) + ": " + tm.getValueAt(e.getFirstRow(), e.getColumn()));
-				}
-			});
+	@Override
+	public void setValueAt(Object value, int rowIndex, int columnIndex){
+		//Verifico si el registro identificado por el rowIndex ya fue editado.
+		//Si no fue editado, get devuelve null, en caso contrario devuelve
+		//el registro con sus valores originales.
+		if(datosOriginales.get(rowIndex) == null){
+			Object[] registro = new Object[headers.length];
+			for(int i = 0; i < headers.length; i++)
+				registro[i] =  datos.elementAt(rowIndex)[i];
+			datosOriginales.put(rowIndex, registro);
 		}
+		
+		Object[] tmp = new Object[headers.length];
+		tmp = datos.elementAt(rowIndex);
+		tmp[columnIndex] = value;
+		datos.setElementAt(tmp, rowIndex);
+
+		fireTableCellUpdated(rowIndex, columnIndex);
+	}
+	
+	@Override
+	public int getRowCount() {
+		return datos.size();
+	}
+	
+	@Override
+	public int getColumnCount() {
+		return headers.length;
+	}
+	
+	@Override
+	public String getColumnName(int columnIndex){
+		return headers[columnIndex];
+	}
+	
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex){
+		return editableCells[columnIndex];
+	}
+
+	private void resetDatos(){
+		this.datosOriginales = new TreeMap<Integer, Object[]>();
+		this.datosNuevos = new Vector<Integer>();
 		
 		if(editableCells == null){
 			editableCells = new boolean[headers.length];
 			for(int i = 0; i < headers.length; i++)
 				editableCells[i] = false;
 		}
-		
-		return tm;
 	}
-
+	
+	/**
+	 * Especifico qué celdas son editables y cuáles no.
+	 * @param editableCells Un array tipo boolean que tiene tantos elementos
+	 *        como columnas tiene el ResultSet. True para las columnas que
+	 *        son editables.
+	 */
+	public void setEditableCells(boolean[] editableCells){
+		this.editableCells = editableCells;
+	}
+	
+	/**
+	 * Especifico el tipo de datos de cada columna del ResultSet
+	 * @param classes Un array con la definición de la clase de cada columna.
+	 */
+	public void setClasses(Class<?>[] classes){						
+		this.classes = classes;
+	}
+	
+	public boolean isEdited(){
+		if(datosOriginales == null && datosNuevos == null)
+			return false;
+		
+		return (!datosOriginales.isEmpty() && !datosNuevos.isEmpty());
+	}
+	
+	public void setEdited(boolean edited){
+		if(!edited)
+			datosOriginales = new TreeMap<Integer, Object[]>();
+	}
+	
+	public TreeMap<Integer, Object[]> getDatosOriginales(){
+		return datosOriginales;
+	}
+		
 	/**
 	 * @return the datos
 	 */
-	public Object[][] getDatos() {
+	
+	public Vector<Object[]> getDatos() {
 		return datos;
 	}
 
-	/**
-	 * @param datos the datos to set
-	 */
-	public void setDatos(Object[][] datos) {
-		this.datos = datos;
-	}
 
 	/**
 	 * @return the headers
 	 */
+	
 	public String[] getHeaders() {
 		return headers;
 	}
@@ -131,13 +166,47 @@ public class CTableModel{
 	/**
 	 * @param headers the headers to set
 	 */
+	
 	public void setHeaders(String[] headers) {
 		this.headers = headers;
 	}
 
 	
-	public void setEditableCells(boolean[] editableCells){
-		this.editableCells = editableCells;
+	/**
+	 * Devuelve el tipo de dato que contiene una columna del ResultSet.
+	 * @param columnIndex Indice de la column de la cual quiero saber su tipo de dato.
+	 * @return Devuelve el tipo de dato que contiene una columna dada.
+	 */
+	
+	public  Class<?> getColumnClass(int columnIndex){
+		if(classes != null)
+			return classes[columnIndex];
+		
+		return String.class;
+	}
+	
+	public void addRow(){
+		Object[] registro = new Object[headers.length];
+		datos.addElement(registro);
+		datosNuevos.add(datos.size() - 1);
+		
+		fireTableDataChanged();
+	}
+	
+	public Vector<Integer> getDatosNuevos(){
+		return datosNuevos;
+	}
+	
+	public boolean isNewRow(int row){
+		for(int i = 0; i < datosNuevos.size(); i++)
+			if(datosNuevos.get(i) == row)
+				return true;
+		
+		return false;
+	}
+	
+	public void resetDatosOriginales(){
+		datosOriginales = new TreeMap<Integer, Object[]>();
 	}
 	
 }

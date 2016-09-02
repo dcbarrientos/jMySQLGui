@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CConnection;
+import javax.swing.ImageIcon;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -80,12 +81,15 @@ public class HostTab extends JPanel{
 		
 		ProcessListTab process = new ProcessListTab(cconnection, resource);
 		tabbedPane.addTab(resource.getString("ProcessList.title") + " (" + process.getCantidadProcesos() + ")", process);
+		tabbedPane.setIconAt(1, new ImageIcon(HostTab.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/process-icon.png")));
 		
 		StatusTab status = new StatusTab(cconnection, resource);
 		tabbedPane.addTab(resource.getString("Status.title") + " (" + status.getCantidadStatus() + ")", status);
+		tabbedPane.setIconAt(2, new ImageIcon(HostTab.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Status-icon.png")));
 		
 		EstadisticasTab estadisticas = new EstadisticasTab(cconnection, resource);
 		tabbedPane.addTab(resource.getString("Estadisticas.title") + " (" + estadisticas.getCantidadEstadisticas() + ")", estadisticas);
+		tabbedPane.setIconAt(3, new ImageIcon(HostTab.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/chart-icon.png")));
 
 		setLayout(new BorderLayout());
 		add(lblServer, BorderLayout.NORTH);
