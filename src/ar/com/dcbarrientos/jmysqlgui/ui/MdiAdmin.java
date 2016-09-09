@@ -93,14 +93,14 @@ public class MdiAdmin extends JPanel{
 		JTabbedPane tabbedPane_1 = new JTabbedPane(JTabbedPane.BOTTOM);
 
 		JScrollPane scrollPane = new JScrollPane();
-		tabbedPane_1.addTab(resource.getString("MdiAdemin.lstSQLTab.title"), null, scrollPane, null);
+		tabbedPane_1.addTab(resource.getString("MdiAdmin.lstSQLTab.title"), null, scrollPane, null);
 		
 		lstSQLModel = new DefaultListModel<String>();
 		lstSQL = new JList<String>(lstSQLModel);
 		scrollPane.setViewportView(lstSQL);
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-		tabbedPane_1.addTab(resource.getString("MdiAdemin.lstMensajesTab.title"), null, scrollPane_1, null);
+		tabbedPane_1.addTab(resource.getString("MdiAdmin.lstMensajesTab.title"), null, scrollPane_1, null);
 		
 		lstMensajes = new JList<String>();
 		lstMensajesModel = new DefaultListModel<String>();
@@ -142,7 +142,7 @@ public class MdiAdmin extends JPanel{
 		
 		dbTree = new DatabaseTree(this, userName, databases, resource);
 		
-		dbTab = new DatabaseTab(this, connection.getConnection());
+		dbTab = new DatabaseTab(this, connection.getConnection(), resource);
 		tableInfoTab = new TableInfoTab(this, connection.getConnection(), resource);
 		tableDataTab = new TableDataTab(this, connection.getConnection(), resource);
 		
@@ -357,27 +357,13 @@ public class MdiAdmin extends JPanel{
 	 * Procedimiento para eliminar una tabla de una base de datos. Verifica si hay una tabla seleccionada
 	 * y pide cofrmación para llevar a cabo la eliminación.
 	 */
+	//TODO. Redireccionar a dropTable(datbase, tablename)
 	public void dropTable(){
 		if(getSelectedTable() != null){
-			int r = JOptionPane.showConfirmDialog(null, resource.getString("DropTable.message") + " " + getSelectedTable() + "?", resource.getString("DropTable.title"), JOptionPane.YES_NO_OPTION);
-			if(r == JOptionPane.YES_OPTION){
-				CQuery query = new CQuery(connection.getConnection());
-				if(query.executeUpdate("DROP TABLE `" + getSelectedDatabase() + "`.`" + getSelectedTable() + "`") >= 0){
-					String msg = getSelectedTable() + " " + resource.getString("DropTable.success");
-					JOptionPane.showMessageDialog(null, msg, resource.getString("DropTable.title"), JOptionPane.INFORMATION_MESSAGE);
-					selectedTableName = null;
-					refreshAll();
-					dbTree.selectDatabaseByName(selectedDatabaseName);
-				}else{
-					String err = query.getErrCode() + ": " + query.getErrMsg();
-					JOptionPane.showMessageDialog(null, err, resource.getString("DropTable.title"), JOptionPane.ERROR_MESSAGE);
-				}
-				try {
-					System.out.println("Base de datos:" + connection.getConnection().getCatalog());
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			if(dropTable(selectedDatabaseName, selectedTableName)){
+				selectedTableName = null;
+				refreshAll();
+				dbTree.selectDatabaseByName(selectedDatabaseName);
 			}
 		}else{
 			JOptionPane.showMessageDialog(null, resource.getString("DropTable.error.no_selection"), resource.getString("DropTable.title"), JOptionPane.ERROR_MESSAGE);
@@ -391,5 +377,37 @@ public class MdiAdmin extends JPanel{
 	public Principal getPrincipal(){
 		return principal;
 	}
+	
+	public boolean dropTable(String databaseName, String tableName){
+		String msg = String.format(resource.getString("MdiAdmin.dropTableConfirm"), databaseName, tableName);
+		int respuesta = JOptionPane.showConfirmDialog(null, msg, resource.getString("MdiAdmin.dropTable.title"), JOptionPane.YES_NO_OPTION);
+		if(respuesta == JOptionPane.YES_OPTION){
+			String sqlTxt = String.format(resource.getString("MdiAdmin.sqlDropTable"), databaseName, tableName);
+			CQuery query = new CQuery(connection.getConnection());
+			if(query.executeUpdate(sqlTxt) != CQuery.ERROR){
+				return true;
+			}else{
+				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("MdiAdmin.dropTable.title"), JOptionPane.ERROR_MESSAGE);
+			}
+		}
 		
+		return false;
+	}
+	
+	public boolean emptyTable(String databaseName, String tableName){
+		String msg = String.format(resource.getString("MdiAdmin.emptyTableConfirm"), databaseName, tableName);
+		int respuesta = JOptionPane.showConfirmDialog(null, msg, resource.getString("MdiAdmin.emptyTable.title"), JOptionPane.YES_NO_OPTION);
+		if(respuesta == JOptionPane.YES_OPTION){
+			String sqlTxt = String.format(resource.getString("MdiAdmin.sqlEmptyTable"), databaseName, tableName);
+			CQuery query = new CQuery(connection.getConnection());
+			int result = query.executeUpdate(sqlTxt);
+			if(result == CQuery.ERROR){
+				JOptionPane.showMessageDialog(null, query.getErrCode() + ": " + query.getErrMsg(), resource.getString("MdiAdmin.emptyTable.title"), JOptionPane.INFORMATION_MESSAGE);
+			}else{
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

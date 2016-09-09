@@ -34,6 +34,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -61,6 +62,8 @@ import ar.com.dcbarrientos.jmysqlgui.database.CTableModel;
  */
 public class DatabaseTab extends JPanel{
 	private static final long serialVersionUID = 1L;
+	
+	private static final int COLUMN_TABLE_NAME = 0;
 
 	//Iconos
 	private ImageIcon viewDataIcon;
@@ -85,6 +88,7 @@ public class DatabaseTab extends JPanel{
 	private MdiAdmin admin;
 	
 	private Connection connection;
+	private ResourceBundle resource;
 	//private String databaseName;
 	private int cantidadFilas = 0;
 	private int filaSeleccionada = 0;
@@ -99,11 +103,12 @@ public class DatabaseTab extends JPanel{
 	 * @param admin Padre de la tab que va a contener este panel.
 	 * @param connection conexión abierta.
 	 */
-	public DatabaseTab(MdiAdmin admin, Connection connection) 
+	public DatabaseTab(MdiAdmin admin, Connection connection, ResourceBundle resource) 
 	{
 		super();
 		this.admin = admin;
 		this.connection = connection;
+		this.resource = resource;
 		
 		jTable1 = new JTable();
 		
@@ -157,6 +162,7 @@ public class DatabaseTab extends JPanel{
 	public void setDatabase(CDatabase database){
 		this.database = database;
 		CTableModel cTableModel= new CTableModel(getDatos(), getHeaders());
+
 		jLabel1.setText("  Base de datos " + database.getName() + ": " + cantidadFilas + " tabla(s)");
 		jTable1.setModel(cTableModel);
 
@@ -184,6 +190,7 @@ public class DatabaseTab extends JPanel{
 		
 		Vector<Object[]> datos = new Vector<Object[]>();
 		Object[] registro;
+		cantidadFilas = tablas.size();
 		
 		for(String key: keys){
 			CTabla elemento = tablas.get(key);
@@ -356,7 +363,7 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void mostrarDatos()
 	{		
-		String tableName = (String) jTable1.getValueAt(filaSeleccionada, 0);
+		String tableName = getSelectedTableName();
 		admin.setSelectedTable(database.getName(), tableName, MdiAdmin.TABLE_DATA_TAB_INDEX);
 	}
 	
@@ -365,8 +372,12 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void mostrarEstructura()
 	{
-		String tableName = (String) jTable1.getValueAt(filaSeleccionada, 0);
+		String tableName = getSelectedTableName();
 		admin.setSelectedTable(database.getName(), tableName, MdiAdmin.TABLE_INFO_TAB_INDEX);
+	}
+	
+	private String getSelectedTableName(){
+		return (String) jTable1.getValueAt(filaSeleccionada, COLUMN_TABLE_NAME);
 	}
 	
 	/**
@@ -374,16 +385,10 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void copiarTabla()
 	{
-		String nombreTabla = (String) jTable1.getValueAt(filaSeleccionada, 0);
-		
-		//TODO todavia no hice este objeto		
-		//String nombreDatabase = principal.getSelectedDatabase();
-		//CopyTable cpTable = new CopyTable(conexion, principal.principal, nombreDatabase, nombreTabla); //dcb dice
-
-		
-		//CopyTable cpTable = new CopyTable(conexion, principal, nombreDatabase, nombreTabla);
-		//TODO descomentar
-		//cpTable.setVisible(true);
+		//String nombreTabla = (String) jTable1.getValueAt(filaSeleccionada, 0);
+		CopyTable copyTable = new CopyTable(admin.getPrincipal(), connection, resource, database.getName(), getSelectedTableName());
+		if(copyTable.showDialog())
+			admin.refreshAll();
 	}
 	
 	/**
@@ -393,6 +398,8 @@ public class DatabaseTab extends JPanel{
 	{
 		//TODO todavia no hice este proc.
 		//principal.vaciarTabla();
+		if(admin.emptyTable(database.getName(), getSelectedTableName()))
+			admin.refreshAll();
 	}
 	
 	/**
@@ -400,8 +407,9 @@ public class DatabaseTab extends JPanel{
 	 */
 	public void borrarTabla()
 	{
-		//TODO todavia no hice este proc.
-		//principal.borrarTabla();
+		if(admin.dropTable(database.getName(), getSelectedTableName())){
+			admin.refreshAll();
+		}
 	}
 	
 	/**

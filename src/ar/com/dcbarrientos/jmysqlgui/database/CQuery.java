@@ -46,7 +46,7 @@ public class CQuery {
 	private String errMsg;				//Mensaje con el error generado
 	private int errCode;				//Codigo del error
 	
-	private Statement st;
+	private Statement statement;
 	private ResultSet result;
 	private ResultSetMetaData meta;		//Información de la consulta realizada.
 	private int rowCount;					//cantidad de registros devueltos por la consulta.
@@ -76,8 +76,8 @@ public class CQuery {
 		rowCount = -1;
 		
 		try {
-			st = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-			result = st.executeQuery(sqlTxt);
+			statement = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			result = statement.executeQuery(sqlTxt);
 			
 			//Obtengo la cantidad de filas devuelta por la consulta.
 			rowCount = getRowCount(result);
@@ -94,16 +94,16 @@ public class CQuery {
 	}
 	
 	public int executeUpdate(String sqlTxt){
-		rowCount = -1;
+		rowCount = ERROR;
 		try{
-			st = connection.createStatement();
-			rowCount = st.executeUpdate(sqlTxt);
+			statement = connection.createStatement();
+			rowCount = statement.executeUpdate(sqlTxt);
 		}catch(SQLException e){
 			error(e.getErrorCode(), e.getMessage());
 		}
 		
 		try {
-			st.close();
+			statement.close();
 		} catch (SQLException e) {
 		}
 		
@@ -113,13 +113,13 @@ public class CQuery {
 	public boolean execute(String sqlTxt){
 		boolean result = false;
 		try {
-			st = connection.createStatement();
-			result = st.execute(sqlTxt);
+			statement = connection.createStatement();
+			result = statement.execute(sqlTxt);
 		} catch (SQLException e) {
 			error(e.getErrorCode(), e.getMessage());
 		}
 		try {
-			st.close();
+			statement.close();
 		} catch (SQLException e) {
 		}
 		
@@ -146,8 +146,8 @@ public class CQuery {
 		try {
 			if(result != null)
 				result.close();
-			if(st != null)
-				st.close();
+			if(statement != null)
+				statement.close();
 			if(ps != null)
 				ps.close();
 		} catch (SQLException e) {

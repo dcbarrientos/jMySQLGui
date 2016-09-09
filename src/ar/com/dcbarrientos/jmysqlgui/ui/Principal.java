@@ -182,7 +182,8 @@ public class Principal extends JFrame {
 	public ImageIcon registroSiguienteIcon;
 	public ImageIcon registroAnteriorIcon;
 	public ImageIcon registroIndicesIcon;	
-
+	public ImageIcon commandLineIcon;
+	
 	private String currentLookAndFeel;
 	private String currentLookAndFeelClass;
 	
@@ -414,6 +415,11 @@ public class Principal extends JFrame {
 		jbAcercade.setToolTipText("Acerca de...");
 		//jbAcercade.setMargin(insets0);
 		jbAcercade.getAccessibleContext().setAccessibleName("Acerca de...");
+		jbAcercade.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				showHelp("TRUNCATE");
+			}
+		});
 		
 		toolBar = new JToolBar();
 		toolBar.add(jbConnection);
@@ -665,6 +671,7 @@ public class Principal extends JFrame {
 		jMenuToolsCommandLine = new JMenuItem();
 		jMenuToolsCommandLine.setVisible(true);
 		jMenuToolsCommandLine.setText("MySQL Command Line client");
+		jMenuToolsCommandLine.setIcon(commandLineIcon);
 		jMenuToolsCommandLine.addActionListener(new ActionListener() {			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -889,6 +896,7 @@ public class Principal extends JFrame {
 		registroSiguienteIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/reg_siguiente.gif"));
 		registroAnteriorIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/reg_anterior.gif"));
 		registroIndicesIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/indices.gif"));
+		commandLineIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/cmd-icon.png"));
 	}
 	
 	/**
@@ -977,5 +985,11 @@ public class Principal extends JFrame {
 			admin.refreshAll();
 		}
 		
+	}
+	
+	private void showHelp(String command){
+		HelpDialog helpDialog = new HelpDialog( cconnection.getConnection(), resource);
+		helpDialog.search(command);
+		helpDialog.setVisible(true);
 	}
 }
