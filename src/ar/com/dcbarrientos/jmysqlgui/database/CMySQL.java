@@ -28,6 +28,7 @@ package ar.com.dcbarrientos.jmysqlgui.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 /**
@@ -38,6 +39,14 @@ public class CMySQL {
 	private Connection connection;
 	private int errCode;
 	private String errMsg;
+	
+	public static final int ATTRIBUTE_COUNT = 6;
+	public static final int ATTRIBUTE_LENGTH =0;
+	public static final int ATTRIBUTE_DECIMAL =1;
+	public static final int ATTRIBUTE_UNSIGNED =2;
+	public static final int ATTRIBUTE_ZEROFILL =3;
+	public static final int ATTRIBUTE_BINARY =4;
+	public static final int ATTRIBUTE_AUTO_INCREMENT =5;
 	
 	/**
 	 * Construye una instancia de CMySQL.
@@ -52,14 +61,9 @@ public class CMySQL {
 	 * @return Un Vector con la lista de Collations, null en caso de error.
 	 */
 	public Vector<String> getCollations(){
-		CQuery query = new CQuery(connection);
 		String sqlTxt = "SELECT * FROM `information_schema`.`COLLATIONS`";
 
-		if(query.executeQuery(sqlTxt) > 0){
-			return query.getStringSet(1);
-		}		
-		query.cerrar();
-		return null;
+		return getStringSet(sqlTxt, "COLLATION_NAME");
 	}
 	
 	/**
@@ -67,22 +71,20 @@ public class CMySQL {
 	 * @return Valor de Collation por defecto. null en caso de error.
 	 */
 	public String getDefaultCollation(){
-		String defaultCollation = null;
 		String sqlTxt = "SHOW VARIABLES LIKE 'collation_server';";
-		CQuery query = new CQuery(connection);
-		if(query.executeQuery(sqlTxt) >= 0){
-			try {
-				query.getResultSet().next();
-				defaultCollation = query.getResultSet().getString("Value");
-			} catch (SQLException e) {
-				error(e.getErrorCode(), e.getMessage());
-			}
-		}
-		query.cerrar();
-		
-		return defaultCollation;
+		return getValue(sqlTxt, "Value");
 	}
 
+	public Vector<String> getEngines(){
+		String sqlTxt = "SHOW ENGINES;";
+		return getStringSet(sqlTxt, "Engine");
+	}
+	
+	public String getDefaultEngine(){
+		String sqlTxt = "SHOW variables like 'default_storage_engine';";
+		return getValue(sqlTxt, "Value");
+	}
+	
 	/**
 	 * Procedimiento que crea una base de datos.
 	 * @param nombre Nombre de la base de datos a crear.
@@ -123,4 +125,86 @@ public class CMySQL {
 	public String getErrMsg(){
 		return errMsg;
 	}
+	
+	private Vector<String> getStringSet(String sqlTxt, String columnName){
+		Vector<String> result = new Vector<String>();
+
+		CQuery query = new CQuery(connection);
+		if(query.executeQuery(sqlTxt) > CQuery.ERROR){
+			result = query.getStringSet(columnName);
+			
+		}
+		query.cerrar();
+		
+		return result;		
+	}
+	
+	private String getValue(String sqlTxt, String columnName){
+		String result = "";
+
+		CQuery query = new CQuery(connection);
+		if(query.executeQuery(sqlTxt) > CQuery.ERROR){
+			try {
+				query.getResultSet().next();
+				result = query.getResultSet().getString(columnName);
+			} catch (SQLException e) {
+				error(e.getErrorCode(), e.getMessage());
+			}
+		}
+		query.cerrar();
+		
+		return result;		
+	}
+	
+	public LinkedHashMap<String, boolean[]> getDataType(){
+		LinkedHashMap<String, boolean[]> dataType = new LinkedHashMap<String, boolean[]>();
+		dataType.put("BIT", new boolean[]{true, false, false, false, false, false});
+		dataType.put("TINYINT", new boolean[]{true, false, true, true, false, true});
+		dataType.put("SMALLINT", new boolean[]{true, false, true, true, false, false});
+		dataType.put("MEDIUMINT", new boolean[]{true, false, true, true, false, true});
+		dataType.put("INT", new boolean[]{true, false, true, true, false, true});
+		//dataType.put("INTEGER", new boolean[]{true, false, true, true, false, ?});
+		dataType.put("BIGINT", new boolean[]{true, false, true, true, false, true});
+
+		//dataType.put("REAL", new boolean[]{true, true, true, true, true, ?});
+		dataType.put("DOUBLE", new boolean[]{false, false, true, true, false, false});
+		dataType.put("FLOAT", new boolean[]{false, false, true, true, false, false});
+		dataType.put("DECIMAL", new boolean[]{false, false, true, true, false, false});
+		//dataType.put("NUMERIC", new boolean[]{true, true, true, true, false, ?});
+		
+		dataType.put("CHAR", new boolean[]{true, false, false, false, true, false});
+		dataType.put("VARCHAR", new boolean[]{true, false, false, false, true, false});
+		dataType.put("TINYTEXT", new boolean[]{false, false, false, false, true, false});
+		dataType.put("TEXT", new boolean[]{true, false, false, false, true, false});
+		dataType.put("MEDIUMTEXT", new boolean[]{false, false, false, false, true, false});
+		dataType.put("LONGTEXT", new boolean[]{false, false, false, false, true, false});
+
+		dataType.put("CHAR", new boolean[]{true, false, false, false, true, false});
+		dataType.put("VARCHAR", new boolean[]{true, false, false, false, true, false});
+		dataType.put("TINYTEXT", new boolean[]{false, false, false, false, true, false});
+		dataType.put("TEXT", new boolean[]{true, false, false, false, true, false});
+		dataType.put("MEDIUMTEXT", new boolean[]{false, false, false, false, true, false});
+		dataType.put("LONGTEXT", new boolean[]{false, false, false, false, true, false});
+
+		dataType.put("BINARY", new boolean[]{true, false, false, false, false, false});
+		dataType.put("VARBINARY", new boolean[]{true, false, false, false, false, false});
+		dataType.put("TINYBLOB", new boolean[]{false, false, false, false, false, false});
+		dataType.put("BLOB", new boolean[]{false, false, false, false, false, false});
+		dataType.put("MEDIUMBLOB", new boolean[]{false, false, false, false, false, false});
+		dataType.put("LONGBLOB", new boolean[]{false, false, false, false, false, false});
+
+		dataType.put("DATE", new boolean[]{false, false, false, false, false, false});
+		dataType.put("TIME", new boolean[]{true, false, false, false, false, false});
+		dataType.put("TIMESTAMP", new boolean[]{true, false, false, false, false, false});
+		dataType.put("DATETIME", new boolean[]{true, false, false, false, false, false});
+		dataType.put("YEAR", new boolean[]{false, false, false, false, false, false});
+
+		//| ENUM(value1,value2,value3,...)
+		//  | SET(value1,value2,value3,...)
+		//  | JSON
+
+		return dataType;
+	};
+	
+	
 }

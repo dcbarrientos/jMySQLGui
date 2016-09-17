@@ -24,7 +24,7 @@
  * Created on 3 de ago. de 2016, 6:45:09 p. m. 
  */
 
-package ar.com.dcbarrientos.jmysqlgui.ui.tableinfo;
+package ar.com.dcbarrientos.jmysqlgui.ui.table;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

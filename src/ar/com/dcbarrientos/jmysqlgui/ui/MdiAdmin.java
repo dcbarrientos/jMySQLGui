@@ -52,9 +52,11 @@ import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
 public class MdiAdmin extends JPanel{	
 	private static final long serialVersionUID = 1L;
 
+	public final static int NONE_TAB_INDEX = -1;
 	public final static int DATABASE_TAB_INDEX = 1;
 	public final static int TABLE_INFO_TAB_INDEX = 2;
 	public final static int TABLE_DATA_TAB_INDEX = 3;
+	public final static int TABLE_EDITOR_TAB_INDEX = 4;
 	
 	JList<String> lstSQL;
 	DefaultListModel<String> lstSQLModel;
@@ -263,6 +265,10 @@ public class MdiAdmin extends JPanel{
 		tableInfoTab.setSelectedTable(getDatabase(databaseName), tableName);
 		tableDataTab.setSelectedTable(databaseName, tableName);
 		
+		//while(tabbedPane.getTabCount() > 5){
+		//	tabbedPane.remove(TABLE_EDITOR_TAB_INDEX);
+		//}
+		
 		if(tabbedPane.getTabCount()<3){
 			setSelectedDatabase(databaseName, false);
 		}
@@ -273,10 +279,24 @@ public class MdiAdmin extends JPanel{
 			tabbedPane.insertTab(resource.getString("TableDataTab.title"), dataIcon, tableDataTab, null, TABLE_DATA_TAB_INDEX);
 		}
 		tabbedPane.setTitleAt(TABLE_INFO_TAB_INDEX, resource.getString("TableInfoTab.title") + " " + tableName);
-		tabbedPane.setSelectedIndex(solapa);
+		if(solapa > NONE_TAB_INDEX)
+			tabbedPane.setSelectedIndex(solapa);
 		refresh();
 	}
-	
+	/*
+	public void editTable(String databaseName, String tableName){
+		if(tabbedPane.getTabCount() < 4){
+			setSelectedTable(databaseName, tableName, NONE_TAB_INDEX);
+		}
+		if(tabbedPane.getTabCount() < 6){
+			TableEditor tableEditor = new TableEditor(this, connection.getConnection(), resource);
+			ImageIcon toolIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/tool-edit-icon.png"));
+			tabbedPane.insertTab(resource.getString("TableEditorTab.title") + tableName, toolIcon, tableEditor, null, TABLE_EDITOR_TAB_INDEX);
+		}
+		tabbedPane.setSelectedIndex(TABLE_EDITOR_TAB_INDEX);
+		refresh();
+	}
+	*/
 	/**
 	 * @return Devuelve la tabla seleccionada actualmente.
 	 */

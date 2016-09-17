@@ -197,6 +197,7 @@ public class Principal extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private JMenuItem jMenuHelpHelp;
 
 	/**
 	 * Constructor de la ventana Principal.
@@ -467,6 +468,15 @@ public class Principal extends JFrame {
 		jMenuHelp = new JMenu();
 		jMenuHelp.setVisible(true);
 		jMenuHelp.setText("Help");
+		
+		jMenuHelpHelp = new JMenuItem("Help");
+		jMenuHelpHelp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				showHelp("");
+			}
+		});
+		jMenuHelpHelp.setIcon(new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Help.GIF")));
+		jMenuHelp.add(jMenuHelpHelp);
 		jMenuHelp.add(jMenuHelpAboutMySqlFront);
 		
 		return jMenuHelp;
@@ -989,7 +999,9 @@ public class Principal extends JFrame {
 	
 	private void showHelp(String command){
 		HelpDialog helpDialog = new HelpDialog( cconnection.getConnection(), resource);
-		helpDialog.search(command);
+		if(command.length() > 0){
+			helpDialog.search(command);
+		}
 		helpDialog.setVisible(true);
 	}
 }

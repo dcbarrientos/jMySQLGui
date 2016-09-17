@@ -35,8 +35,8 @@ import javax.swing.JTabbedPane;
 
 import ar.com.dcbarrientos.jmysqlgui.database.CDatabase;
 import ar.com.dcbarrientos.jmysqlgui.database.CTabla;
-import ar.com.dcbarrientos.jmysqlgui.ui.tableinfo.TableColumnsPanel;
-import ar.com.dcbarrientos.jmysqlgui.ui.tableinfo.TableInfoPanel;
+import ar.com.dcbarrientos.jmysqlgui.ui.table.TableColumnsPanel;
+import ar.com.dcbarrientos.jmysqlgui.ui.table.TableInfoPanel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>

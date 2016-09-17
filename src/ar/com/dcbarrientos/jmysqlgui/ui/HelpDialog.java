@@ -229,6 +229,11 @@ public class HelpDialog extends JDialog{
 		getContentPane().add(panel_5, BorderLayout.SOUTH);
 		
 		btnCerrar = new JButton(resource.getString("HelpDialog.btnCerrar"));
+		btnCerrar.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				dispose();
+			}
+		});
 		panel_5.add(btnCerrar);
 		
 		setTitle(resource.getString("HelpDialog.title"));

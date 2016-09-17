@@ -32,6 +32,8 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -293,6 +295,11 @@ public class DatabaseTab extends JPanel{
 		//TODO manejar el inset0
 		//jbInsertRecord.setMargin(Principal.insets0);
 		jbInsertRecord.getAccessibleContext().setAccessibleName("Insert Record...");
+		jbInsertRecord.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e){
+				editTable();
+			}
+		});
 
 		emptyTableIcon = new ImageIcon(Principal.class.getResource("/ar/com/dcbarrientos/jmysqlgui/images/Emptytable.gif"));
 		jbEmptyTable.setIcon(emptyTableIcon);
@@ -485,4 +492,10 @@ public class DatabaseTab extends JPanel{
 		return (String)jTable1.getValueAt(index, 0);
 	}
 
+	private void editTable(){
+		//admin.editTable(database.getName(), getSelectedTableName());
+		TableEditor tableEditor = new TableEditor(admin, connection, resource, database.getName());
+		tableEditor.setTableName(getSelectedTableName());
+		System.out.println(tableEditor.showDialog());
+	}
 }

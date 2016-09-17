@@ -178,7 +178,7 @@ public class CQuery {
 		return datos;		
 	}
 	
-	public Vector<String> getStringSet(int c){
+	public Vector<String> getStringSet(String c){
 		Vector<String> vDatos = new Vector<String>();
 		try {
 			while(result.next()){

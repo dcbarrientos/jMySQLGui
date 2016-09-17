@@ -1,4 +1,4 @@
-package ar.com.dcbarrientos.jmysqlgui.ui.tableinfo;
+package ar.com.dcbarrientos.jmysqlgui.ui.table;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
