@@ -31,6 +31,7 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.table.AbstractTableModel;
 
+import ar.com.dcbarrientos.jmysqlgui.database.CField;
 import ar.com.dcbarrientos.jmysqlgui.database.CNewTableField;
 
 /**
@@ -83,6 +84,10 @@ public class NewTableModel extends AbstractTableModel{
 		fields.elementAt(rowIndex).setValue(aValue, columnIndex);
 		
 		fireTableDataChanged();
+	}
+	
+	public Vector<CNewTableField> getFields(){
+		return fields;
 	}
 	
 	public void addNew(){

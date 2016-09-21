@@ -159,4 +159,8 @@ public class CNewTableField {
 		if(index == COMMENTS_INDEX)
 			comments = (String)value;			
 	}
+	
+	public String getName(){
+		return name.getText();
+	}
 }

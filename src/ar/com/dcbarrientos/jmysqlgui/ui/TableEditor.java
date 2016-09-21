@@ -42,6 +42,7 @@ import java.util.ResourceBundle;
 
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -60,12 +61,19 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
+import ar.com.dcbarrientos.jmysqlgui.database.CIndex;
 import ar.com.dcbarrientos.jmysqlgui.database.CMySQL;
 import ar.com.dcbarrientos.jmysqlgui.database.CNewTableField;
 import ar.com.dcbarrientos.jmysqlgui.database.CQuery;
 import ar.com.dcbarrientos.jmysqlgui.ui.table.NewTableModel;
 import ar.com.dcbarrientos.jmysqlgui.ui.table.NewTableRenderer;
+import ar.com.dcbarrientos.jmysqlgui.ui.table.TableEditorIndexColumnsModel;
+import ar.com.dcbarrientos.jmysqlgui.ui.table.TableEditorIndexModel;
 
 /**
  * @author Diego Barrientos <dc_barrientos@yahoo.com.ar>
@@ -75,17 +83,20 @@ public class TableEditor extends JDialog{
 	private static final long serialVersionUID = 1L;
 	
 	private static final int OK = 0;
-
+	private static final int INDEX_TYPE_COLUMN = 1;
 	
 	private MdiAdmin admin;
 	private Connection connection;
 	private ResourceBundle resource;
 	private CMySQL mySql;
 	private LinkedHashMap<String, boolean[]> dataType;
+	//private Vector<CIndex>indices;
 	private String databaseName;
 	private String tableName;
 	private NewTableModel tableStructureModel;
 	private DataTypeComboModel dataTypeModel;
+	private TableEditorIndexModel tableIndexesModel;
+	TableEditorIndexColumnsModel tableEditorIndexColumnsModel;
 	
 	private JPanel panel;
 	private JLabel lblNewLabel;
@@ -155,7 +166,9 @@ public class TableEditor extends JDialog{
 	private JScrollPane scrollPaneIndexColumns;
 	private JTable tableIndexColumns;
 	private JScrollPane scrollPaneIndexComment;
-	private JTextArea txtrIndexcomment;
+	private JTextArea txtrIndexcomment;	
+	private JComboBox<String> cbIndexesList; 
+	
 	
 	public TableEditor(MdiAdmin admin, Connection connection, ResourceBundle resource, String databaseName){
 		super(admin.getPrincipal(), true);
@@ -416,6 +429,10 @@ public class TableEditor extends JDialog{
 		panelIndexColumns.add(scrollPaneIndexColumns, BorderLayout.CENTER);
 		
 		tableIndexColumns = new JTable();
+		
+		//tableIndexColumns.setDefaultRenderer(JCheckBox.class, new TableEditorIndexColumnsRenderer());
+		
+		
 		scrollPaneIndexColumns.setViewportView(tableIndexColumns);
 		
 		panelBotones = new JPanel();
@@ -423,6 +440,11 @@ public class TableEditor extends JDialog{
 		fl_panelBotones.setAlignment(FlowLayout.LEFT);
 		
 		btnAddIndex = new JButton("Add");
+		btnAddIndex.addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e){
+				addNewIndex();
+			}
+		});
 		panelBotones.add(btnAddIndex);
 		
 		btnDeleteIndex = new JButton("Delete");
@@ -448,6 +470,17 @@ public class TableEditor extends JDialog{
 		);
 		
 		tableIndexes = new JTable();
+		tableIndexesModel = new TableEditorIndexModel();
+		tableIndexes.setModel(tableIndexesModel);
+		tableIndexes.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				selectIndex();
+				System.out.println("Hay un cambio en la seleccion");
+				
+			}
+		});
+		
 		scrollPaneIndexesList.setViewportView(tableIndexes);
 		panelIndexesList.setLayout(gl_panelIndexesList);
 		panelIndexes.setLayout(gl_panelIndexes);
@@ -793,6 +826,8 @@ public class TableEditor extends JDialog{
 	
 	private void initValues(){
 		dataType = mySql.getDataType();
+		//indices = new Vector<CIndex>();
+		
 		lblSchemaValue.setText(databaseName);
 		
 		String defaultCollation = mySql.getDefaultCollation();
@@ -811,6 +846,28 @@ public class TableEditor extends JDialog{
 
 		dataTypeModel = new DataTypeComboModel();
 		cbDataType.setModel(dataTypeModel);
+		
+		tableEditorIndexColumnsModel = new TableEditorIndexColumnsModel();
+		tableEditorIndexColumnsModel.addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				if(tableIndexColumns.getRowCount()>0){
+					//Paso los datos del modelo de las columnas del indice al modelo del indice.
+					int fila = tableIndexes.getSelectedRow();
+					tableIndexesModel.setFields(fila, tableEditorIndexColumnsModel.getDatos());
+					//tableIndexes.setRowSelectionInterval(fila, fila);
+					//System.out.println(tableIndexColumns.getValueAt(tableEditorIndexColumnsModel.getEditedRow(), 1));
+					//System.out.println("\t" + tableIndexColumns.getValueAt(tableEditorIndexColumnsModel.getEditedRow(), 0));
+				}
+			}
+		});
+		//tableEditorIndexColumnsModel.setFields(tableStructureModel.getFields());
+		//tableIndexColumns.setModel(tableEditorIndexColumnsModel);
+		
+		//Descomentar
+		cbIndexesList = new JComboBox<String>(CIndex.getIndexesList());
+		tableIndexes.getColumnModel().getColumn(INDEX_TYPE_COLUMN).setCellEditor(new DefaultCellEditor(cbIndexesList));
+		
 	}
 
 	public void setTableName(String tableName){
@@ -975,6 +1032,8 @@ public class TableEditor extends JDialog{
 				
 				processColumnsDefinition(showTxt.substring(showTxt.indexOf('(') + 1, showTxt.lastIndexOf(')')).trim());
 				processOptions(showTxt.substring(showTxt.lastIndexOf(')') + 1, showTxt.length()).trim());
+				tableEditorIndexColumnsModel.setFields(tableStructureModel.getFields());
+				tableIndexColumns.setModel(tableEditorIndexColumnsModel);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1055,6 +1114,25 @@ public class TableEditor extends JDialog{
 			}else{
 				//TODO procesar datos de la definicion que no son columnas, como keys y otras
 				//No es columna
+				//Clave primaria
+				CIndex cIndex = new CIndex();
+				if(linea.toUpperCase().startsWith(CIndex.PRIMARY_TYPE_NAME.toUpperCase())){
+					cIndex.setName(CIndex.PRIMARY_TYPE_NAME.toUpperCase());
+					cIndex.setType(CIndex.PRIMARY_TYPE_NAME);
+				}
+				
+				String txtColumns = linea.substring(linea.indexOf("(")+1, linea.lastIndexOf(")"));
+				String columnTokens[] = txtColumns.split(",");
+				int indice = 0;
+				while(indice < columnTokens.length){
+					//Separar por espacio para ver si es desc o asc
+					Object[] indexTemp = new Object[CIndex.FIELD_ATTRIBUTES];
+					indexTemp[0] = columnTokens[indice].substring(1, columnTokens[indice].length()-1);
+					cIndex.addField(indexTemp);
+					indice++;
+				}
+				tableIndexesModel.addIndex(cIndex);
+				System.out.println(linea);
 			}
 		}
 	}
@@ -1092,6 +1170,22 @@ public class TableEditor extends JDialog{
 		}
 	}
 	
+	private void addNewIndex(){
+		tableIndexesModel.addIndex();
+		tableIndexes.setRowSelectionInterval(tableIndexes.getRowCount()-1, tableIndexes.getRowCount()-1);
+
+		tableEditorIndexColumnsModel.setFields(tableStructureModel.getFields());
+		tableIndexColumns.setModel(tableEditorIndexColumnsModel);
+		tableIndexColumns.repaint();
+	}
+	
+	private void selectIndex(){
+		//int x = tableIndexes.getSelectedRow();
+		if(tableIndexes.getSelectedRow() > -1)
+			tableEditorIndexColumnsModel.setDatos(tableIndexesModel.getFields(tableIndexes.getSelectedRow()));
+		tableIndexColumns.repaint();
+	}
+
 	class DataTypeComboModel extends AbstractListModel<String> implements ComboBoxModel<String>{
 		private static final long serialVersionUID = 1L;
 		private String seleccion = null;
